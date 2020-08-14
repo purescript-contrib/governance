@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "eslint src && spago build --purs-args '--censor-lib --strict'"
+  },
+  "devDependencies": {
+    "eslint": "^7.6.0"
+  }
+}
