@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "contrib-updater",
+  "bin": {
+    "contrib-updater": "bin/index.js"
+  },
+  "scripts": {
+    "mkbin": "spago bundle-app --to bin/output.js"
+  }
+}

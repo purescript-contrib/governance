@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [{{mainBranch}}]
   pull_request:
-    branches: [main]
+    branches: [{{mainBranch}}]
 
 jobs:
   build:
@@ -48,4 +48,4 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: spago test
+        run: npm run test
