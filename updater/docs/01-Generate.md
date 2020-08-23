@@ -1,10 +1,38 @@
-# PureScript Contributors Library Templates
+# Generate Contributor Library Templates
 
-This directory contains templates for a standard set of files that each project in the Contributors organization has. Feel free to use these templates in non-Contributor libraries as well!
+The `generate` command in the `contrib-updater` CLI generates a standard set of files that each project in the Contributors organization has. The templates for these files are stored in the `templates` directory.
+
+The `templates` directory contains templates for a standard set of files that each project in the Contributors organization has. Feel free to use these templates in non-Contributor libraries as well!
 
 ## Usage
 
-The library templates are used by the `contrib-updater` tool to help manage migrating new libraries into the Contributors organization or to update existing libraries when our standard structure changes.
+The `generate` command will create a standard set of files in the current repository based on the set of library templates in the `templates` directory. It will fill in a set of available variables with the contents you provide and will make backups of any existing files that conflict.
+
+This command is used to help manage migrating new libraries into the Contributors organization or to update existing libraries when our standard structure changes.
+
+Example CLI usage:
+
+```sh
+contrib-updater generate \
+  # Indicates that JS-related templates should be
+  # generated as well as the standard templates.
+  --uses-js \
+  --owner purescript-contrib \
+  --main-branch master \
+  --display-name '`argonaut-codecs`' \
+  --title 'Argonaut Codecs' \
+  --maintainer thomashoneyman
+```
+
+In typical usage you will:
+
+1. Clone the target repository and change into it
+2. Run `contrib-updater generate` and provide values for the relevant variables; if the library uses any JS files, include the `--uses-js` flag.
+3. Reconcile the new content with any information that should be preserved from the existing repository (any conflicting files will have been added to the backups directory). For example, you may want to copy sections of the old README into the new one or into the documentation where appropriate.
+4. Delete the backups directory and any other files which are no longer necessary in the target repository.
+5. Open a PR with your changes!
+
+## Variables
 
 Templates can use the following variables (in code, see the `Updater.Variable` module), provided via the `contrib-updater` tool:
 
@@ -27,17 +55,6 @@ type Variables =
 - `maintainer` refers to the assigned maintainer for the library (ex: `"thomashoneyman"`). This is required in the CLI.
 
 Any of these variables can be used in template files via `{{variableName}}` syntax. When templates are generated for a particular repository these variables will be replaced with the values you provided.
-
-Example CLI usage:
-
-```sh
-contrib-updater generate \
-  --owner purescript-contrib \
-  --main-branch master \
-  --display-name '`argonaut-codecs`' \
-  --title 'Argonaut Codecs' \
-  --maintainer thomashoneyman
-```
 
 ## Provided Templates
 

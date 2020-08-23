@@ -1,5 +1,6 @@
-module Updater.Template
-  ( runBaseTemplates
+module Updater.Generate.Template
+  ( Variables(..)
+  , runBaseTemplates
   , runJsTemplates
   ) where
 
@@ -8,16 +9,50 @@ import Prelude
 import Control.Alternative ((<|>))
 import Data.Foldable (traverse_)
 import Data.Interpolate (i)
+import Data.String as String
+import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Heterogeneous.Folding (class FoldingWithIndex, class HFoldlWithIndex, hfoldlWithIndex)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff as FS
 import Node.FS.Aff.Extra as FS.Extra
 import Node.Globals (__dirname)
 import Node.Path (FilePath, resolve)
 import Node.Process (cwd)
-import Updater.Variable (Variables, replaceVariables)
+
+-- | The variables supported when generating templates. See the documentation
+-- | for more details on these variables and correct syntax.
+type Variables =
+  { owner :: String
+  , mainBranch :: String
+  , packageName :: String
+  , displayName :: String
+  , displayTitle :: String
+  , maintainer :: String
+  }
+
+data ReplaceVariables = ReplaceVariables
+
+instance replaceVariables' ::
+  IsSymbol sym =>
+  FoldingWithIndex ReplaceVariables (SProxy sym) String String String where
+  foldingWithIndex ReplaceVariables key acc val = do
+    replace (reflectSymbol key) val acc
+    where
+    -- | TODO: This find/replace method could probably be done better via `parsing`
+    replace k v = String.replaceAll (String.Pattern (format k)) (String.Replacement v)
+    format str = i "{{" str "}}"
+
+-- | Given a file's contents and a record of variables to replace, replaces all
+-- | variables in those contents.
+replaceVariables
+  :: HFoldlWithIndex ReplaceVariables String Variables String
+  => String
+  -> Variables
+  -> String
+replaceVariables = hfoldlWithIndex ReplaceVariables
 
 -- | Generate the standard templates for a PureScript Contributor project into
 -- | the correct file locations, backing up any existing files that would

@@ -11,6 +11,8 @@ import Options.Applicative (Parser, (<**>))
 import Options.Applicative as OA
 import Updater.Command (Command(..))
 
+-- | Parse command line arguments into a valid `Command`, if possible, or
+-- | display the help menu or an error if the parser fails.
 run :: Effect Command
 run = OA.execParser $ OA.info (command <**> OA.helper) $ fold
   [ OA.fullDesc
@@ -25,6 +27,7 @@ run = OA.execParser $ OA.info (command <**> OA.helper) $ fold
       """
   ]
 
+-- | Parse a `Command` from a set of command line arguments.
 command :: Parser Command
 command = OA.hsubparser $ fold
   [ OA.command "generate"

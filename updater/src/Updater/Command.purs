@@ -11,13 +11,24 @@ import Data.Maybe (Maybe, fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class.Console (log)
-import Updater.Template (runBaseTemplates, runJsTemplates)
+import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
 import Updater.Utils.Dhall as Utils.Dhall
 
 -- | The data type which describes what tasks this CLI tool can assist with. See
+-- | the library documentation for a full description of what these commands are
+-- | intended to accomplish.
 data Command
   = Generate GenerateOptions
 
+-- | Run a command, performing any relevant updates.
+run :: Command -> Effect Unit
+run = launchAff_ <<< case _ of
+  Generate opts ->
+    runGenerate opts
+
+-- | Possible flags to control how library templates should be generated. These
+-- | are largely the same as the set of supported variables (see the documentation
+-- | for the `Generate` command for more details).
 type GenerateOptions =
   { usesJS :: Boolean
   , owner :: Maybe String
@@ -27,13 +38,8 @@ type GenerateOptions =
   , maintainer :: String
   }
 
--- | Run a command, performing updates to the current library
-run :: Command -> Effect Unit
-run = launchAff_ <<< case _ of
-  Generate opts ->
-    runGenerate opts
-
--- | Generate
+-- | Generate templates in the repository, backing up any conflicting files
+-- | that would be overwritten.
 runGenerate :: GenerateOptions -> Aff Unit
 runGenerate opts = do
   spago <- Utils.Dhall.readSpagoFile

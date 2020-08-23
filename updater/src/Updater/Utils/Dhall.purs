@@ -22,9 +22,11 @@ import Node.FS.Aff as FS
 import Node.Path (FilePath)
 import Sunde as S
 
--- | The contents of the `spago.dhall` file
+-- | The contents of the `spago.dhall` file. Projects are required to use Spago.
 type SpagoContents = { name :: String }
 
+-- | Read the `spago.dhall` file in the root of the repository and parse its
+-- | contents.
 readSpagoFile :: Aff SpagoContents
 readSpagoFile = do
   expr <- readDhallFile "./spago.dhall"
@@ -56,7 +58,8 @@ readDhallFile filePath = do
 -- | The type of a valid Dhall expression
 newtype DhallExpr = DhallExpr String
 
--- | Run the `dhall-json` executable and parse the resulting JSON value.
+-- | Run the `dhall-json` executable and parse the resulting JSON value. If this
+-- | fails, you probably aren't in the Nix shell, which provides that executable.
 runDhallToJson :: DhallExpr -> Aff Json
 runDhallToJson (DhallExpr expr) = do
   result <- S.spawn

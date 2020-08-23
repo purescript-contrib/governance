@@ -2,6 +2,8 @@
 
 This directory contains a command-line tool useful for updating existing contrib libraries, migrating new ones, and performing common administrative tasks.
 
+Please see the [contrib-updater documentation](./docs) to learn about the commands available in the CLI tool and how to manage related assets like templates.
+
 ## Installation
 
 First, ensure you have all necessary dependencies by entering a developer shell:
@@ -32,3 +34,7 @@ You can see usage information by passing the `--help` flag to `contrib-updater` 
 ```sh
 contrib-updater --help
 ```
+
+## Documentation
+
+The [contrib-updater documentation](./docs) describes the commands available in the CLI tool and how to manage related assets like templates.
