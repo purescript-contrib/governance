@@ -63,8 +63,8 @@ runGenerate opts = do
     Finished generating files. You should verify any contents in the backups
     directory and remove that directory before committing your changes.
 
-    !! NOT ALL TEMPLATE AREAS HAVE BEEN FILLED IN !!
+    !! NOT ALL CONTENT IS COMPLETE !!
 
-    You should now grep for `{{` to find text content that you should still
-    fill in with correct contents (mostly in README files).
+    You should now fill in the library's Summary and Quick Start sections in
+    the README.md file in the root of the repository.
     """

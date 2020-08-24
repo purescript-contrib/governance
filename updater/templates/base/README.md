@@ -5,7 +5,7 @@
 [![Pursuit](http://pursuit.purescript.org/packages/purescript-{{packageName}}/badge)](http://pursuit.purescript.org/packages/purescript-{{packageName}})
 [![Maintainer: {{maintainer}}](https://img.shields.io/badge/maintainer-{{maintainer}}-teal.svg)](http://github.com/{{maintainer}})
 
-{{One to three sentence description of the library's purpose}.}
+The library summary hasn't been written yet (contributions are welcome!). The library summary describes the library's purpose in one to three sentences.
 
 ## Installation
 

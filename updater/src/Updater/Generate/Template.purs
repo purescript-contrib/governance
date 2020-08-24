@@ -70,9 +70,9 @@ runBaseTemplates = runTemplates baseTemplates
     , githubIssueBugReport
     , githubIssueChangeRequest
     , githubWorkflowCI
+    , githubWorkflowStale
     , githubContributing
     , githubPullRequest
-    , githubStale
     ]
 
 -- | Generate the templates for Contributor projects that rely on JS files (for
@@ -179,6 +179,12 @@ githubWorkflowCI = Template
   , to: ".github/workflows/ci.yml"
   }
 
+githubWorkflowStale :: Template
+githubWorkflowStale = Template
+  { from: "base/.github/workflows/stale.yml"
+  , to: ".github/workflows/stale.yml"
+  }
+
 githubContributing :: Template
 githubContributing = Template
   { from: "base/.github/CONTRIBUTING.md"
@@ -189,12 +195,6 @@ githubPullRequest :: Template
 githubPullRequest = Template
   { from: "base/.github/PULL_REQUEST_TEMPLATE.md"
   , to: ".github/PULL_REQUEST_TEMPLATE.md"
-  }
-
-githubStale :: Template
-githubStale = Template
-  { from: "base/.github/stale.yml"
-  , to: ".github/stale.yml"
   }
 
 jsGithubWorkflowCI :: Template
