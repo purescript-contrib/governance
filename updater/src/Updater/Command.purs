@@ -11,8 +11,9 @@ import Control.Monad.Except (runExceptT, throwError)
 import Control.Parallel (parTraverse_)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (foldMap, traverse_)
+import Data.Foldable (traverse_)
 import Data.Maybe (Maybe, fromMaybe)
+import Data.String (joinWith)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
@@ -105,13 +106,15 @@ runSyncLabels opts = do
   resp <- runExceptT do
     sifted <- SyncLabels.getLabels requestOpts
 
-    let logPreview msg = log <<< append msg <<< foldMap (show <<< _.name)
+    let logPreview msg = log <<< append msg <<< joinWith ", " <<< map (show <<< _.name)
 
-    logPreview "Creating: " sifted.create
-    parTraverse_ (SyncLabels.createLabel requestOpts) sifted.create
+    when (not Array.null sifted.create) do
+      logPreview "Creating: " sifted.create
+      parTraverse_ (SyncLabels.createLabel requestOpts) sifted.create
 
-    logPreview "Patching: " sifted.update
-    parTraverse_ (SyncLabels.patchLabel requestOpts) sifted.update
+    when (not Array.null sifted.update) do
+      logPreview "Patching: " sifted.update
+      parTraverse_ (SyncLabels.patchLabel requestOpts) sifted.update
 
     when (opts.deleteUnused && not Array.null sifted.delete) do
       logPreview "Deleting: " sifted.delete
@@ -125,4 +128,4 @@ runSyncLabels opts = do
       throwError e
 
     Right _ ->
-      log "Did not successfully create, update, and delete labels."
+      log "Successfully completed syncing labels."
