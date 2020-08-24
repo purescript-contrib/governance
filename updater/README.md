@@ -12,10 +12,10 @@ First, ensure you have all necessary dependencies by entering a developer shell:
 nix-shell
 ```
 
-Then, build the executable by running the `mkbin` script:
+Then, build the executable by running the `build` script:
 
 ```sh
-npm run mkbin
+npm run build
 ```
 
 Finally, run `npm link` to add the executable to your PATH:

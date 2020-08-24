@@ -20,11 +20,6 @@ run = OA.execParser $ OA.info (command <**> OA.helper) $ fold
       """
       contrib-updater - a utility for managing Contributor libraries
       """
-  , OA.progDesc
-      """
-      Clone the repository you wish to update, run contrib-updater in the root
-      of that repository, and then push your changes and open a pull request.
-      """
   ]
 
 -- | Parse a `Command` from a set of command line arguments.
@@ -33,6 +28,9 @@ command = OA.hsubparser $ fold
   [ OA.command "generate"
       $ OA.info generate
       $ OA.progDesc "Generate template files that follow the Contributors best practices"
+  , OA.command "sync-labels"
+      $ OA.info syncLabels
+      $ OA.progDesc "Sync issue label names, descriptions, and colors with the standard set"
   ]
   where
   generate :: Parser Command
@@ -73,3 +71,36 @@ command = OA.hsubparser $ fold
       ]
 
     in { usesJS, owner, mainBranch, displayName, displayTitle, maintainer }
+
+-- type SyncLabelsOptions =
+--   { token :: String
+--   , repo :: String
+--   , owner :: Maybe String
+--   , deleteUnused :: Boolean
+--   }
+  syncLabels :: Parser Command
+  syncLabels = map SyncLabels ado
+    token <- OA.strOption $ fold
+      [ OA.long "token"
+      , OA.metavar "STRING"
+      , OA.help "A personal access token for GitHub with at least public_repo scope"
+      ]
+
+    repo <- OA.strOption $ fold
+      [ OA.long "repo"
+      , OA.metavar "STRING"
+      , OA.help "The repository to update labels for. Ex: purescript-machines"
+      ]
+
+    owner <- optional $ OA.strOption $ fold
+      [ OA.long "owner"
+      , OA.metavar "STRING"
+      , OA.help "The repository owner. Default: purescript-contrib"
+      ]
+
+    deleteUnused <- OA.switch $ fold
+      [ OA.long "delete-unused"
+      , OA.help "Whether to delete issue labels not in the standard Contributors set."
+      ]
+
+    in { token, repo, owner, deleteUnused }

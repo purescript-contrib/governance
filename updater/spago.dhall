@@ -1,6 +1,7 @@
 { name = "contrib-updater"
 , dependencies =
-  [ "argonaut-core"
+  [ "affjax"
+  , "argonaut-core"
   , "codec-argonaut"
   , "console"
   , "effect"

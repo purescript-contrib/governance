@@ -1,16 +1,24 @@
 module Updater.Command
   ( Command(..)
   , GenerateOptions(..)
+  , SyncLabelsOptions(..)
   , run
   ) where
 
 import Prelude
 
+import Control.Monad.Except (throwError)
+import Data.Array as Array
+import Data.Either (Either(..))
+import Data.Foldable (foldMap, traverse_)
 import Data.Maybe (Maybe, fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
+import Effect.Aff as Aff
 import Effect.Class.Console (log)
 import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
+import Updater.SyncLabels.Request (IssueLabelRequestOpts)
+import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
 
 -- | The data type which describes what tasks this CLI tool can assist with. See
@@ -18,12 +26,16 @@ import Updater.Utils.Dhall as Utils.Dhall
 -- | intended to accomplish.
 data Command
   = Generate GenerateOptions
+  | SyncLabels SyncLabelsOptions
 
 -- | Run a command, performing any relevant updates.
 run :: Command -> Effect Unit
 run = launchAff_ <<< case _ of
   Generate opts ->
     runGenerate opts
+
+  SyncLabels opts ->
+    runSyncLabels opts
 
 -- | Possible flags to control how library templates should be generated. These
 -- | are largely the same as the set of supported variables (see the documentation
@@ -68,3 +80,35 @@ runGenerate opts = do
     You should now fill in the library's Summary and Quick Start sections in
     the README.md file in the root of the repository.
     """
+
+type SyncLabelsOptions =
+  { token :: String
+  , repo :: String
+  , owner :: Maybe String
+  , deleteUnused :: Boolean
+  }
+
+-- | Update the issue labels used in the repository to match the colors, label
+-- | names, and descriptions used across the Contributors libraries.
+-- | that would be overwritten.
+runSyncLabels :: SyncLabelsOptions -> Aff Unit
+runSyncLabels opts = do
+  let
+    requestOpts :: IssueLabelRequestOpts
+    requestOpts =
+      { token: opts.token
+      , repo: opts.repo
+      , owner: fromMaybe "purescript-contrib" opts.owner
+      }
+
+  SyncLabels.getLabels requestOpts >>= case _ of
+    Left e ->
+      throwError $ Aff.error e
+
+    Right { create, update, delete } -> do
+      traverse_ (SyncLabels.createLabel requestOpts) create
+      traverse_ (SyncLabels.patchLabel requestOpts) update
+
+      when (opts.deleteUnused && not Array.null delete) do
+        log $ "Deleting: " <> foldMap show delete
+        traverse_ (SyncLabels.deleteLabel requestOpts) delete

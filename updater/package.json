@@ -5,6 +5,12 @@
     "contrib-updater": "bin/index.js"
   },
   "scripts": {
-    "mkbin": "spago bundle-app --to bin/output.js"
+    "build": "spago bundle-module --to output/index.js && ncc build --minify --out bin index.js"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.23.0"
+  },
+  "dependencies": {
+    "xhr2": "^0.2.0"
   }
 }
