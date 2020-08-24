@@ -7,7 +7,8 @@ module Updater.Command
 
 import Prelude
 
-import Control.Monad.Except (throwError)
+import Control.Monad.Except (runExceptT, throwError)
+import Control.Parallel (parTraverse_)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldMap, traverse_)
@@ -15,7 +16,7 @@ import Data.Maybe (Maybe, fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
-import Effect.Class.Console (log)
+import Effect.Class.Console (error, log)
 import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
@@ -101,14 +102,27 @@ runSyncLabels opts = do
       , owner: fromMaybe "purescript-contrib" opts.owner
       }
 
-  SyncLabels.getLabels requestOpts >>= case _ of
-    Left e ->
-      throwError $ Aff.error e
+  resp <- runExceptT do
+    sifted <- SyncLabels.getLabels requestOpts
 
-    Right { create, update, delete } -> do
-      traverse_ (SyncLabels.createLabel requestOpts) create
-      traverse_ (SyncLabels.patchLabel requestOpts) update
+    let logPreview msg = log <<< append msg <<< foldMap (show <<< _.name)
 
-      when (opts.deleteUnused && not Array.null delete) do
-        log $ "Deleting: " <> foldMap show delete
-        traverse_ (SyncLabels.deleteLabel requestOpts) delete
+    logPreview "Creating: " sifted.create
+    parTraverse_ (SyncLabels.createLabel requestOpts) sifted.create
+
+    logPreview "Patching: " sifted.update
+    parTraverse_ (SyncLabels.patchLabel requestOpts) sifted.update
+
+    when (opts.deleteUnused && not Array.null sifted.delete) do
+      logPreview "Deleting: " sifted.delete
+      traverse_ (SyncLabels.deleteLabel requestOpts) sifted.delete
+
+  case resp of
+    Left e -> do
+      log "Did not successfully create, update, and delete labels: "
+      error (Aff.message e)
+      log "You can retry this operation."
+      throwError e
+
+    Right _ ->
+      log "Did not successfully create, update, and delete labels."

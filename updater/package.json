@@ -2,7 +2,7 @@
   "private": true,
   "name": "contrib-updater",
   "bin": {
-    "contrib-updater": "bin/index.js"
+    "contrib-updater": "bin/updater.js"
   },
   "scripts": {
     "build": "spago bundle-module --to output/index.js && ncc build --minify --out bin index.js"

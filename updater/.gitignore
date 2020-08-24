@@ -8,5 +8,4 @@ output
 generated-docs
 
 bin/*
-!bin/index.js
-!bin/main.js
+!bin/updater.js
