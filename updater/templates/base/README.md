@@ -28,8 +28,8 @@ spago install {{packageName}}
 {{displayName}} documentation is stored in a few places:
 
 1. Module documentation is [published on Pursuit](https://pursuit.purescript.org/packages/purescript-{{packageName}}).
-2. Written documentation and [the changelog](./docs/changelog.md) are kept in [the docs directory](./docs).
-3. Usage examples can be found in [the test suite](./test), the [examples folder](./examples), and in [the PureScript Cookbook](https://github.com/jordanmartinez/purescript-cookbook).
+2. Written documentation and [the changelog](./docs/CHANGELOG.md) are kept in [the docs directory](./docs).
+3. Usage examples can be found in [the test suite](./test)
 
 If you get stuck, there are several ways to get help:
 
