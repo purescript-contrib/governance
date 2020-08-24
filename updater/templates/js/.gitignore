@@ -2,6 +2,7 @@
 !.gitignore
 !.github
 !.editorconfig
+!.eslintrc.json
 
 output
 generated-docs

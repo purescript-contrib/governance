@@ -40,7 +40,7 @@ If you get stuck, there are several ways to get help:
 
 You can contribute to {{displayName}} in several ways:
 
-1. If you encounter a problem or have a question, please [open an issue](https://github.com/{{owner}}/purescript-{{packageName}}/issues) issue. We'll do our best to work with you to resolve or answer it.
+1. If you encounter a problem or have a question, please [open an issue](https://github.com/{{owner}}/purescript-{{packageName}}/issues). We'll do our best to work with you to resolve or answer it.
 
 2. If you would like to contribute code, tests, or documentation, please [read the contributor guide](./.github/CONTRIBUTING.md). It's a short, helpful introduction to contributing to this library, including development instructions.
 

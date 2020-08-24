@@ -6,7 +6,6 @@ module Updater.Command
 
 import Prelude
 
-import Data.Interpolate (i)
 import Data.Maybe (Maybe, fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
@@ -49,7 +48,7 @@ runGenerate opts = do
       { owner: fromMaybe "purescript-contrib" opts.owner
       , mainBranch: fromMaybe "main" opts.mainBranch
       , packageName: spago.name
-      , displayName: fromMaybe (i '`' spago.name '`') opts.displayName
+      , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
       , displayTitle: fromMaybe spago.name opts.displayTitle
       , maintainer: opts.maintainer
       }

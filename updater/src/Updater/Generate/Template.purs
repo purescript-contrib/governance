@@ -89,6 +89,12 @@ runJsTemplates = runTemplates jsTemplates
     , jsPackageJson
     ]
 
+-- | The directory name where conflicting files will be stored when writing new
+-- | templates. Any existing files which a template would overwrite will be
+-- | copied into this directory.
+backupsDirname :: String
+backupsDirname = "backups"
+
 -- | Run a selection of templates.
 runTemplates :: Array Template -> Variables -> Aff Unit
 runTemplates templates variables = do
@@ -96,6 +102,14 @@ runTemplates templates variables = do
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
   let runTemplateOptions = { backupsDir, templatesDir, variables }
   traverse_ (runTemplate runTemplateOptions) templates
+  where
+  getBackupsDirectory :: Aff FilePath
+  getBackupsDirectory = do
+    current <- liftEffect cwd
+    log $ i "Creating directory '" backupsDirname "' for conflicting files."
+    path <- liftEffect $ resolve [ current ] backupsDirname
+    FS.mkdir path <|> pure unit
+    pure path
 
 type RunTemplateOptions =
   { templatesDir :: FilePath
@@ -111,42 +125,23 @@ type RunTemplateOptions =
 -- | 4. Writing the new contents into the correct directory location
 runTemplate :: RunTemplateOptions -> Template -> Aff Unit
 runTemplate opts (Template { from, to }) = do
-  exists <- FS.exists to
-  when exists do
-    backupFile { relativeFilePath: to, backupsDir: opts.backupsDir }
-
   templatePath <- liftEffect $ resolve [ opts.templatesDir ] from
   templateContents <- FS.readTextFile UTF8 templatePath
+
+  exists <- FS.exists to
+  when exists do
+    existingContents <- FS.readTextFile UTF8 to
+    -- Only back up a conflicting file if it differs from the existing file.
+    unless (templateContents == existingContents) do
+      backupsPath <- liftEffect $ resolve [ opts.backupsDir ] to
+      FS.Extra.writeTextFile backupsPath existingContents
+      FS.unlink to
 
   FS.Extra.writeTextFile to (replaceVariables templateContents opts.variables)
 
 -- | The source and destination for a given template. Templates will be copied
 -- | from their source to destination, with text replacement applied along the way.
 newtype Template = Template { from :: FilePath, to :: FilePath }
-
--- | Backs up a file by copying it into the backups directory
-backupFile :: { relativeFilePath :: FilePath, backupsDir :: FilePath } -> Aff Unit
-backupFile { relativeFilePath, backupsDir } = do
-  contents <- FS.readTextFile UTF8 relativeFilePath
-  newPath <- liftEffect $ resolve [ backupsDir ] relativeFilePath
-  FS.Extra.writeTextFile newPath contents
-  FS.unlink relativeFilePath
-
--- | The directory name where conflicting files will be stored when writing new
--- | templates. Any existing files which a template would overwrite will be
--- | copied into this directory.
-backupsDirname :: String
-backupsDirname = "backups"
-
--- | Creates the backup directory if it does not already exist and returns the
--- | full path to the created directory.
-getBackupsDirectory :: Aff FilePath
-getBackupsDirectory = do
-  current <- liftEffect cwd
-  log $ i "Creating directory '" backupsDirname "' for conflicting files."
-  path <- liftEffect $ resolve [ current ] backupsDirname
-  FS.mkdir path <|> pure unit
-  pure path
 
 gitignore :: Template
 gitignore = Template { from: "base/.gitignore", to: ".gitignore" }
