@@ -18,4 +18,5 @@ and see documentation for a particular command via:
 ```sh
 # contrib-updater COMMAND --help
 contrib-updater generate --help
+contrib-updater sync-labels --help
 ```

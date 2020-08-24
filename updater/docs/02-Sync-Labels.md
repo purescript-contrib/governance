@@ -19,6 +19,15 @@ contrib-updater sync-labels \
   --delete-unused \
 ```
 
+Example output:
+
+```text
+Creating: "breaking change", "document me", "stale"
+Patching: "question", "help wanted", "enhancement"
+Deleting: "wontfix", "invalid", "duplicate"
+Successfully completed syncing labels.
+```
+
 ## Updating Labels
 
 The set of labels used in the Contributors libraries is maintained by the `SyncLabels` command and should be updated in the source code if you need to make a change.
