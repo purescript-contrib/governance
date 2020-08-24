@@ -5,6 +5,3 @@
 
 output
 generated-docs
-
-node_modules
-*.lock
