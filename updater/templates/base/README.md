@@ -17,11 +17,7 @@ spago install {{packageName}}
 
 ## Quick start
 
-{{Minimal usage example covering the most common use case(s) for the library. Longer usage examples can be added to the project documentation in ./docs}}
-
-```purs
-
-```
+The quick start hasn't been written yet (contributions are welcome!). The quick start covers a common, minimal use case fo r the library, whereas longer examples and tutorials are kept in the [docs directory](./docs.)
 
 ## Documentation
 
@@ -29,7 +25,7 @@ spago install {{packageName}}
 
 1. Module documentation is [published on Pursuit](https://pursuit.purescript.org/packages/purescript-{{packageName}}).
 2. Written documentation and [the changelog](./docs/CHANGELOG.md) are kept in [the docs directory](./docs).
-3. Usage examples can be found in [the test suite](./test)
+3. Usage examples can be found in [the test suite](./test).
 
 If you get stuck, there are several ways to get help:
 
