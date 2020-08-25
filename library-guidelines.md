@@ -45,7 +45,7 @@ Some of these files can be customized per-repository, but most of them are stand
 Each library also contains some standard directories, including:
 
 - A `docs` directory containing a changelog and any other expanded documentation for the library such as tutorials and walkthroughs
-- - A `.github` directory containing issue templates, pull request templates, contributing guide, and workflows for tests in continuous integration and automatically labeling stale issues and pull requests.
+- A `.github` directory containing issue templates, pull request templates, contributing guide, and workflows for tests in continuous integration and automatically labeling stale issues and pull requests.
 
 #### Standard Labels
 
