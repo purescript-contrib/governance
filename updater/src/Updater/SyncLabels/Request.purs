@@ -16,7 +16,6 @@ import Affjax.RequestHeader (RequestHeader(..))
 import Affjax.ResponseFormat as AXRF
 import Affjax.StatusCode (StatusCode(..))
 import Control.Monad.Except (ExceptT(..), throwError)
-import Data.Argonaut.Core (stringify)
 import Data.Array as Array
 import Data.Bifunctor (lmap)
 import Data.Codec (encode, (<~<))
@@ -30,7 +29,6 @@ import Data.Interpolate (i)
 import Data.Maybe (Maybe(..), isNothing)
 import Data.Symbol (SProxy(..))
 import Effect.Aff (Aff, Error, error)
-import Effect.Class.Console (logShow)
 import Record as Record
 import Updater.SyncLabels.IssueLabel (IssueLabel, issueLabelCodec)
 import Updater.SyncLabels.IssueLabel as IssueLabel
@@ -62,7 +60,6 @@ getLabels opts = do
   unless (resp.status == StatusCode 200) do
     throwError $ error "Did not receive StatusCode 200 when getting labels."
 
-  _ <- logShow $ stringify resp.body
   let decoded = Codec.decode (CA.array issueLabelCodec) resp.body
 
   labels <- ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
