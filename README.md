@@ -4,11 +4,11 @@ The Contributors organization maintains useful libraries and tools on behalf of 
 
 If you are a PureScript organization or user we encourage you to use any of these resources as you see fit! There is no need to attribute anything to the Contributors organization.
 
-This repository contains helpful resources and guidelines for Contributors:
+You may want to begin with these resources:
 
 - The [contributing](./contributing.md) guide helps new contributors get started with their first contributions to a member library.
 - The [library guidelines](./library-guidelines.md) guide outlines expectations for each library in the organization, including minimum requirements for maintenance, repository structure, documentation, and testing.
-- The [templates](./templates) directory contains a standardized set of files for libraries to use, including continuous integration, issue templates, linting rules for libraries that use the FFI, issue labels, and more. It also includes tools for setting up a new library or updating an existing one.
+- The [contrib-updater](./updater) CLI tool helps maintainers with tasks like standardizing repositories, setting issue labels, migrating new libraries into the organization, and more. It also includes templates for common files like READMEs, continuous integration, and more. 
 
 ## What is the PureScript Contributors organization?
 
