@@ -6,19 +6,64 @@ This short handbook outlines the mimimum expectations for libraries in the PureS
 
 Libraries in the Contributors organization are expected to:
 
-1. Have at least one (and preferably two) assigned maintainers, as indicated by badges in the project README.
-2. Use the standard repository configuration, including pull request and issue templates, a `stale.yml` file for stale issues, and the other files included in the [templates](./templates).
-3. Have an adequate test suite which is exercised by continuous integration, so that pull requests that pass CI can be merged with confidence.
-4. Have adequate documentation in the form of documentation comments (for module documentation to publish to Pursuit), written documentation in a `./docs` directory, and an up-to-date changelog.
-5. Have a README which includes the standard badges, a short motivation for the library, installation instructions, a quick start showing a minimal library example, links to relevant documentation, and a link to the contributing guide.
-
-In addition, libraries which use the FFI are expected to include the standard `eslint` configuration and ensure that pull requests pass linting on the FFI files before they are merged.
+1. Have at least one (and preferably more) assigned maintainers, as indicated by badges in the project README.
+2. Have adequate documentation in the form of module documentation published to Pursuit, a README containing a library summary, installation instructions, and more, and a `docs` directory containing at least a short tutorial and a changelog (see [the documentation section below](#documentation)).
+3. Have an adequate test suite which is exercised by continuous integration (see [the tests section below](#tests)
+4. Use the standard Contributors repository structure, which can be generated with the [contrib-updater](./updater) tool (see [the repository structure section below](#repository-structure)).
 
 Libraries in this organization should be useful, tested, and well-documented. These are great things to shoot for in any library, but Contributors libraries are held to a particular standard to encourage new contributions and to serve as an example for other libraries in the community.
 
+### Documentation
+
+Contributors libraries are expected to have adequate documentation. To accomplish that goal, we expect each repository to have:
+
+1. A repository README containing badges for the build status, latest release, and maintainers, a short summary of the library's purpose, installation instructions, a quick start with a minimal usage example, and links to the documentation and contributing guide
+2. Expanded documentation like how-tos, tutorials, and concept overviews in the docs directory (at minimum a short tutorial that expands on the quick start), along with a CHANGELOG.md file
+3. Documentation comments for the majority and preferably all publicly-exported types and functions in the library modules, which should should be uploaded to Pursuit.
+
+If you are migrating a library to the Contributors organization (or creating an new one), the [contrib-updater](./updater) tool can generate templates on your behalf to help you get started with documentation.
+
+### Tests
+
+Contributors libraries are expected to have tests which exercise tricky parts of the code and serve as usage examples. These tests should help maintainers merge pull requests which pass CI with confidence. We expect each repository to have:
+
+1. One or more tests in a `test` directory
+2. Continuous integration via GitHub Actions which exercises this test on pull requests and the main branch
+
+### Repository Structure
+
+Contributors libraries share a standard structure and set of configuration files which helps ensure that contributors know where to find things and how to get set up when they use a new library. Each library includes some standard files, such as:
+
+- A `.gitignore` file which ignores common dotfiles and compiler artifacts
+- An `.editorconfig` file which editors can use to set spacing, trailing newlines, and other configuration
+
+Some of these files can be customized per-repository, but most of them are standardized across the organization (for example, the `.editorconfig` file). In addition, libraries which use the FFI are expected to include additional files such as:
+
+- The standard `.eslintrc.json` configuration for `eslint`, which should be run on pull requests
+- A `package.json` file which installs `eslint` and can be used for scripts
+
+Each library also contains some standard directories, including:
+
+- A `docs` directory containing a changelog and any other expanded documentation for the library such as tutorials and walkthroughs
+- - A `.github` directory containing issue templates, pull request templates, contributing guide, and workflows for tests in continuous integration and automatically labeling stale issues and pull requests.
+
+#### Standard Labels
+
+Labels are a big part of curating the issue tracker in a Contributors library. Labels are regularly, automatically synced via the [contrib-updater](./updater) CLI tool, which will set labels, colors, and descriptions across repositories.
+
+We use several standard labels for issues of various types:
+
+- `bug` is used for issues that point out a legitimate bug in the library that ought to be fixed
+- `document me` is used for issues that indicate documentation needs to be updated, or for issues with great content that ought to be added to the documentation.
+- `enhancement` is used for issues or pull requests that represent an addition to the library
+- `good first issue` is used to label tasks that are good for beginners to take on. This is one of the best ways to encourage new contributions to the PureScript ecosystem!
+- `help wanted` is used as a call to action to indicate that the maintainers would like a PR that solves this issue.
+
+Further issues can be found on [this repository's issue labels page](https://github.com/purescript-contrib/governance/issues/labels).
+
 ## Expectations for Maintainers
 
-Maintainers are expected to ensure that libraries they maintain meet the minimum library requirements. The [templates](./templates) can help you make sure the library you maintain has all the necessary scaffolding for these requirements.
+Maintainers are expected to ensure that libraries they maintain meet the minimum library requirements. The [contrib-updater CLI tool](./updater) can help you make sure the library you maintain has all the necessary scaffolding for these requirements.
 
 In addition, maintainers are expected to:
 
@@ -27,16 +72,6 @@ In addition, maintainers are expected to:
 3. Curate the issue tracker and repository contents. Maintainers should apply labels to issues, close old issues, and ensure that documentation adequately helps users get started with new contributions. If you notice a way to make the repository more accessible to newcomers, open and label an issue that describes how the project could be improved!
 
 Maintainers aren't necessarily expected to actively contribute code to the projects they maintain. They _are_ expected to keep the repository up to date, to respond quickly to issues and pull requests, and to curate issues in the issue tracker.
-
-### Standard Labels
-
-Labels are a big part of curating the issue tracker in a Contributors library. We use several standard labels for issues of various types:
-
-- `bug` is used for issues that point out a legitimate bug in the library that ought to be fixed
-- `document me` is used for issues that indicate documentation needs to be updated, or for issues with great content that ought to be added to the documentation.
-- `enhancement` is used for issues that represent an addition to the library
-- `good first issue` is used to label tasks that are good for beginners to take on. This is one of the best ways to encourage new contributions to the PureScript ecosystem!
-- `help wanted` is used as a call to action to indicate that the maintainers would like a PR that solves this issue.
 
 ## Resources for Maintainers
 
