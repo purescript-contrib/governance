@@ -1,0 +1,11 @@
+.psc*
+.purs*
+.spago
+
+bower_components
+node_modules
+output
+generated-docs
+
+bin/*
+!bin/updater.js

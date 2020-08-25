@@ -1,0 +1,11 @@
+.*
+!.gitignore
+!.github
+!.editorconfig
+!.eslintrc.json
+
+output
+generated-docs
+
+node_modules
+*.lock

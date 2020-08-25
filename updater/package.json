@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "contrib-updater",
+  "bin": {
+    "contrib-updater": "bin/updater.js"
+  },
+  "scripts": {
+    "build": "spago bundle-module --to output/index.js && ncc build --minify --out bin index.js"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.23.0"
+  },
+  "dependencies": {
+    "xhr2": "^0.2.0"
+  }
+}

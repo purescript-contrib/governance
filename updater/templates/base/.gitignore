@@ -1,0 +1,7 @@
+.*
+!.gitignore
+!.github
+!.editorconfig
+
+output
+generated-docs
