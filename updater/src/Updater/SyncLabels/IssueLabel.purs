@@ -1,7 +1,11 @@
 module Updater.SyncLabels.IssueLabel where
 
+import Data.Argonaut.Core (Json, fromString, isString)
+import Data.Codec ((<~<))
 import Data.Codec.Argonaut as CA
+import Data.Codec.Argonaut.Migration as CAM
 import Data.Codec.Argonaut.Record as CAR
+import Data.Maybe (Maybe(..))
 
 -- | A GitHub issue label consisting of three parts:
 -- |
@@ -20,7 +24,12 @@ issueLabelCodec =
     { name: CA.string
     , description: CA.string
     , color: CA.string
-    }
+    } <~< CAM.addDefaultOrUpdateField "description" fixNull
+  where
+  fixNull :: Maybe Json -> Json
+  fixNull = case _ of
+    Just v | isString v -> v
+    _ -> fromString ""
 
 -- | The full set of issue labels supported by Contributor libraries.
 labels :: Array IssueLabel
