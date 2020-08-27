@@ -69,6 +69,7 @@ runBaseTemplates = runTemplates baseTemplates
     , docsChangelog
     , githubIssueBugReport
     , githubIssueChangeRequest
+    , githubIssueConfig
     , githubWorkflowCI
     , githubWorkflowStale
     , githubContributing
@@ -172,6 +173,12 @@ githubIssueChangeRequest :: Template
 githubIssueChangeRequest = Template
   { from: "base/.github/ISSUE_TEMPLATE/change-request.md"
   , to: ".github/ISSUE_TEMPLATE/change-request.md"
+  }
+
+githubIssueConfig :: Template
+githubIssueConfig = Template
+  { from: "base/.github/ISSUE_TEMPLATE/config.yml"
+  , to: ".github/ISSUE_TEMPLATE/config.yml"
   }
 
 githubWorkflowCI :: Template
