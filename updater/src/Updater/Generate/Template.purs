@@ -87,6 +87,7 @@ runJsTemplates = runTemplates jsTemplates
     [ jsGithubWorkflowCI
     , jsEslintrc
     , jsPackageJson
+    , jsGitignore
     ]
 
 -- | The directory name where conflicting files will be stored when writing new
@@ -208,3 +209,6 @@ jsEslintrc = Template { from: "js/.eslintrc.json", to: ".eslintrc.json" }
 
 jsPackageJson :: Template
 jsPackageJson = Template { from: "js/package.json", to: "package.json" }
+
+jsGitignore :: Template
+jsGitignore = Template { from: "js/.gitignore", to: ".gitignore" }
