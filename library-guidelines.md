@@ -10,6 +10,7 @@ Libraries in the Contributors organization are expected to:
 2. Have adequate documentation in the form of module documentation published to Pursuit, a README containing a library summary, installation instructions, and more, and a `docs` directory containing at least a short tutorial and a changelog (see [the documentation section below](#documentation)).
 3. Have an adequate test suite which is exercised by continuous integration (see [the tests section below](#tests))
 4. Use the standard Contributors repository structure, which can be generated with the [contrib-updater](./updater) tool (see [the repository structure section below](#repository-structure)).
+5. Use a default branch of `main` for the repository.
 
 Libraries in this organization should be useful, tested, and well-documented. These are great things to shoot for in any library, but Contributors libraries are held to a particular standard to encourage new contributions and to serve as an example for other libraries in the community.
 
