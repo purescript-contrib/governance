@@ -6,26 +6,17 @@ Please see the [contrib-updater documentation](./docs) to learn about the comman
 
 ## Installation
 
-First, ensure you have all necessary dependencies by entering a developer shell:
+The Nix shell provides all necessary dependencies and hooks for installing dependencies and building the tool. Start by entering the shell:
 
 ```sh
 nix-shell
 ```
 
-Then, build the executable by running the `build` script:
+You can now use `contrib-updater` to run the tool:
 
 ```sh
-npm run build
+contrib-updater --help
 ```
-
-Finally, run `npm link` to add the executable to your PATH:
-
-```sh
-# Nix restricts permissions, so sudo is required if inside the shell.
-sudo npm link
-```
-
-You can now use the `contrib-updater` executable.
 
 ## Usage
 

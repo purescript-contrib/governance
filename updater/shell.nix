@@ -19,4 +19,10 @@ in pkgs.stdenv.mkDerivation {
     pkgs.nodejs-12_x
     pkgs.dhall-json
   ];
+  executable = ./bin/index.js;
+  shellHook =''
+    npm install
+    npm run build
+    alias contrib-updater='${pkgs.nodejs-12_x}/bin/node ${./.}/bin/index.js'
+  '' ;
 }
