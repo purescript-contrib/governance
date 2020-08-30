@@ -23,6 +23,6 @@ in pkgs.stdenv.mkDerivation {
   shellHook =''
     npm install
     npm run build
-    alias contrib-updater='${pkgs.nodejs-12_x}/bin/node ${./.}/bin/index.js'
+    alias contrib-updater='${pkgs.nodejs-12_x}/bin/node "./bin/index.js"'
   '' ;
 }
