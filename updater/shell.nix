@@ -13,13 +13,14 @@ let
 
 in pkgs.stdenv.mkDerivation {
   name = "halogen-hooks";
+
   buildInputs = with pursPkgs; [
     pursPkgs.purs
     pursPkgs.spago
     pkgs.nodejs-12_x
     pkgs.dhall-json
   ];
-  executable = ./bin/index.js;
+
   shellHook =''
     npm install
     npm run build
