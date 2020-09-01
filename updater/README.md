@@ -15,7 +15,7 @@ nix-shell
 This will produce an `bin/index.js` file, which is the executable script. You can run commands using the path to this script. The easiest way to do so is by aliasing the full path:
 
 ```sh
-alias contrib-updater='node ~/path/to/governance/updater/bin/index.js'
+alias contrib-updater="node $(readlink -f bin/index.js)"
 ```
 
 You can now use `contrib-updater` to run the tool:
