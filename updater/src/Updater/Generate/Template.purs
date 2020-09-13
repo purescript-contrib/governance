@@ -49,7 +49,7 @@ replaceVariables vars contents = do
 
   -- Variables which admit only one value should be replaced inline:
   --
-  --   "This package is {{ packageName }} in the registry"
+  --   "This package is {{packageName}} in the registry"
   --   where packageName = my-package becomes
   --   "This package is my-package in the registry"
   replaceOne k v =
@@ -60,7 +60,7 @@ replaceVariables vars contents = do
   -- Variables which admit many values should be replaced multiple times with
   -- newlines in between:
   --
-  --   "{{ maintainers }}"
+  --   "{{maintainers}}"
   --   where maintainers = [ "a", "b" ] becomes
   --   "a\nb"
   replaceMany k vs =
