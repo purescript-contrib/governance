@@ -68,7 +68,7 @@ runGenerate opts = do
         <<< String.split (String.Pattern "-")
 
     maintainerTemplate maintainer =
-      i "[![Maintainer: " maintainer "](https://img.shields.io/badge/maintainer-" maintainer "-teal.svg)](http://github.com/" maintainer ")"
+      i "[![Maintainer: " maintainer "](https://img.shields.io/badge/maintainer-" maintainer "-teal.svg)](https://github.com/" maintainer ")"
 
     variables =
       { owner: fromMaybe "purescript-contrib" opts.owner
