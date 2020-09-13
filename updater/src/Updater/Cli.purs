@@ -65,7 +65,7 @@ command = OA.hsubparser $ fold
       ]
 
     maintainers <- OA.some $ OA.strOption $ fold
-      [ OA.long "maintainers"
+      [ OA.long "maintainer"
       , OA.metavar "STRING"
       , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]

@@ -13,7 +13,7 @@ This command is used to help manage migrating new libraries into the Contributor
 Example CLI usage with defaults used (this is the typical case):
 
 ```sh
-contrib-updater generate --maintainers thomashoneyman
+contrib-updater generate --maintainer garyb --maintainer thomashoneyman
 ```
 
 Example CLI usage with all options specified:
@@ -27,7 +27,7 @@ contrib-updater generate \
   --main-branch main \
   --display-name '`argonaut-codecs`' \
   --dislay-title 'Argonaut Codecs' \
-  --maintainers thomashoneyman
+  --maintainer thomashoneyman
 ```
 
 In typical usage you will:
@@ -49,7 +49,7 @@ type Variables =
   , packageName :: String
   , displayName :: String
   , displayTitle :: String
-  , maintainers :: NonEmptyList String
+  , maintainer :: NonEmptyList String
   }
 ```
 
@@ -58,7 +58,7 @@ type Variables =
 - `packageName` refers to the package name as represented in the PureScript registry and Spago installation instructions. This is pulled automatically from the `spago.dhall` file.
 - `displayName` refers to the way you'd like to render the package name in markdown files. Defaults in the CLI to the name of the package in backticks, ie. `argonaut-codecs`, but it's also common to provide a string (for example, Argonaut Codecs) instead.
 - `displayTitle` refers to the way you'd like to render the package name in markdown titles. Defaults in the CLI to the name of the package in title case.
-- `maintainers` refers to the assigned maintainer(s) for the library (ex: `"thomashoneyman"`). This is required in the CLI.
+- `maintainer` refers to the assigned maintainer(s) for the library (ex: `"thomashoneyman"`). This is required in the CLI.
 
 Any of these variables can be used in template files via `{{variableName}}` syntax. When templates are generated for a particular repository these variables will be replaced with the values you provided.
 
