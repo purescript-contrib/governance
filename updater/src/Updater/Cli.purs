@@ -59,18 +59,18 @@ command = OA.hsubparser $ fold
       ]
 
     displayTitle <- optional $ OA.strOption $ fold
-      [ OA.long "title"
+      [ OA.long "display-title"
       , OA.metavar "STRING"
-      , OA.help "How to render this library's name in titles. Default: 'package-name'"
+      , OA.help "How to render this library's name in .md file titles. Default: 'Package Name'"
       ]
 
-    maintainer <- OA.strOption $ fold
-      [ OA.long "maintainer"
+    maintainers <- OA.some $ OA.strOption $ fold
+      [ OA.long "maintainers"
       , OA.metavar "STRING"
-      , OA.help "The assigned maintainer for this repository (required). Ex: 'thomashoneyman'"
+      , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]
 
-    in { usesJS, owner, mainBranch, displayName, displayTitle, maintainer }
+    in { usesJS, owner, mainBranch, displayName, displayTitle, maintainers }
 
 -- type SyncLabelsOptions =
 --   { token :: String

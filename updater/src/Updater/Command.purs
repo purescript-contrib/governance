@@ -12,8 +12,12 @@ import Control.Parallel (parTraverse_)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
+import Data.Interpolate (i)
+import Data.List.Types (NonEmptyList)
 import Data.Maybe (Maybe, fromMaybe)
 import Data.String (joinWith)
+import Data.String as String
+import Data.String.Extra as String.Extra
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
@@ -48,7 +52,7 @@ type GenerateOptions =
   , mainBranch :: Maybe String
   , displayName :: Maybe String
   , displayTitle :: Maybe String
-  , maintainer :: String
+  , maintainers :: NonEmptyList String
   }
 
 -- | Generate templates in the repository, backing up any conflicting files
@@ -58,13 +62,21 @@ runGenerate opts = do
   spago <- Utils.Dhall.readSpagoFile
 
   let
+    toTitleCase =
+      String.joinWith " "
+        <<< map String.Extra.upperCaseFirst
+        <<< String.split (String.Pattern "-")
+
+    maintainerTemplate maintainer =
+      i "[![Maintainer: " maintainer "](https://img.shields.io/badge/maintainer-" maintainer "-teal.svg)](http://github.com/" maintainer ")"
+
     variables =
       { owner: fromMaybe "purescript-contrib" opts.owner
       , mainBranch: fromMaybe "main" opts.mainBranch
       , packageName: spago.name
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
-      , displayTitle: fromMaybe spago.name opts.displayTitle
-      , maintainer: opts.maintainer
+      , displayTitle: fromMaybe (toTitleCase spago.name) opts.displayTitle
+      , maintainers: map maintainerTemplate opts.maintainers
       }
 
   runBaseTemplates variables

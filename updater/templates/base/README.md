@@ -3,7 +3,7 @@
 [![CI](https://github.com/{{owner}}/purescript-{{packageName}}/workflows/CI/badge.svg?branch={{mainBranch}})](https://github.com/{{owner}}/purescript-{{packageName}}/actions?query=workflow%3ACI+branch%3A{{mainBranch}})
 [![Release](http://img.shields.io/github/release/{{owner}}/purescript-{{packageName}}.svg)](https://github.com/{{owner}}/purescript-{{packageName}}/releases)
 [![Pursuit](http://pursuit.purescript.org/packages/purescript-{{packageName}}/badge)](http://pursuit.purescript.org/packages/purescript-{{packageName}})
-[![Maintainer: {{maintainer}}](https://img.shields.io/badge/maintainer-{{maintainer}}-teal.svg)](http://github.com/{{maintainer}})
+{{maintainers}}
 
 The library summary hasn't been written yet (contributions are welcome!). The library summary describes the library's purpose in one to three sentences.
 
