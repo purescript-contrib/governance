@@ -24,5 +24,6 @@ in pkgs.stdenv.mkDerivation {
   shellHook =''
     npm install
     npm run build
+    alias contrib-updater="node $(readlink -f bin/index.js)"
   '' ;
 }
