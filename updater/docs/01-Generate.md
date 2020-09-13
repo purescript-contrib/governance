@@ -26,7 +26,7 @@ contrib-updater generate \
   --owner purescript-contrib \
   --main-branch main \
   --display-name '`argonaut-codecs`' \
-  --dislay-title 'Argonaut Codecs' \
+  --display-title 'Argonaut Codecs' \
   --maintainer thomashoneyman
 ```
 
