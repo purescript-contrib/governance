@@ -9,12 +9,12 @@ import Prelude
 import Control.Alternative ((<|>))
 import Data.Foldable (traverse_)
 import Data.Interpolate (i)
+import Data.List.NonEmpty as NEL
+import Data.List.Types (NonEmptyList)
 import Data.String as String
-import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Heterogeneous.Folding (class FoldingWithIndex, class HFoldlWithIndex, hfoldlWithIndex)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff as FS
 import Node.FS.Aff.Extra as FS.Extra
@@ -30,29 +30,43 @@ type Variables =
   , packageName :: String
   , displayName :: String
   , displayTitle :: String
-  , maintainer :: String
+  , maintainers :: NonEmptyList String
   }
 
-data ReplaceVariables = ReplaceVariables
+-- | Replace each variable in the provided file contents, returning the updated
+-- | file to be written.
+replaceVariables :: Variables -> String -> String
+replaceVariables vars contents = do
+  contents
+    # replaceOne "owner" vars.owner
+    # replaceOne "mainBranch" vars.mainBranch
+    # replaceOne "packageName" vars.packageName
+    # replaceOne "displayName" vars.displayName
+    # replaceOne "displayTitle" vars.displayTitle
+    # replaceMany "maintainers" vars.maintainers
+  where
+  format str = i "{{" str "}}"
 
-instance replaceVariables' ::
-  IsSymbol sym =>
-  FoldingWithIndex ReplaceVariables (SProxy sym) String String String where
-  foldingWithIndex ReplaceVariables key acc val = do
-    replace (reflectSymbol key) val acc
-    where
-    -- | TODO: This find/replace method could probably be done better via `parsing`
-    replace k v = String.replaceAll (String.Pattern (format k)) (String.Replacement v)
-    format str = i "{{" str "}}"
+  -- Variables which admit only one value should be replaced inline:
+  --
+  --   "This package is {{packageName}} in the registry"
+  --   where packageName = my-package becomes
+  --   "This package is my-package in the registry"
+  replaceOne k v =
+    String.replaceAll
+      (String.Pattern (format k))
+      (String.Replacement v)
 
--- | Given a file's contents and a record of variables to replace, replaces all
--- | variables in those contents.
-replaceVariables
-  :: HFoldlWithIndex ReplaceVariables String Variables String
-  => String
-  -> Variables
-  -> String
-replaceVariables = hfoldlWithIndex ReplaceVariables
+  -- Variables which admit many values should be replaced multiple times with
+  -- newlines in between:
+  --
+  --   "{{maintainers}}"
+  --   where maintainers = [ "a", "b" ] becomes
+  --   "a\nb"
+  replaceMany k vs =
+    String.replaceAll
+      (String.Pattern (format k))
+      (String.Replacement (String.joinWith "\n" (NEL.toUnfoldable vs)))
 
 -- | Generate the standard templates for a PureScript Contributor project into
 -- | the correct file locations, backing up any existing files that would
@@ -139,7 +153,7 @@ runTemplate opts (Template { from, to }) = do
       FS.Extra.writeTextFile backupsPath existingContents
       FS.unlink to
 
-  FS.Extra.writeTextFile to (replaceVariables templateContents opts.variables)
+  FS.Extra.writeTextFile to (replaceVariables opts.variables templateContents)
 
 -- | The source and destination for a given template. Templates will be copied
 -- | from their source to destination, with text replacement applied along the way.

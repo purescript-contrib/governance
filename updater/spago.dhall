@@ -5,12 +5,12 @@
   , "codec-argonaut"
   , "console"
   , "effect"
-  , "heterogeneous"
   , "interpolate"
   , "node-fs-aff"
   , "node-process"
   , "optparse"
   , "psci-support"
+  , "strings-extra"
   , "sunde"
   ]
 , packages = ./packages.dhall
