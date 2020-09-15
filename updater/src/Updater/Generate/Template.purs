@@ -173,8 +173,8 @@ docsReadme = Template { from: "base/docs/README.md", to: "docs/README.md" }
 
 docsChangelog :: Template
 docsChangelog = Template
-  { from: "base/docs/CHANGELOG.md"
-  , to: "docs/CHANGELOG.md"
+  { from: "base/CHANGELOG.md"
+  , to: "CHANGELOG.md"
   }
 
 githubIssueBugReport :: Template
@@ -209,8 +209,8 @@ githubWorkflowStale = Template
 
 githubContributing :: Template
 githubContributing = Template
-  { from: "base/.github/CONTRIBUTING.md"
-  , to: ".github/CONTRIBUTING.md"
+  { from: "base/CONTRIBUTING.md"
+  , to: "CONTRIBUTING.md"
   }
 
 githubPullRequest :: Template
