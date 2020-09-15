@@ -72,7 +72,7 @@ The templates include default content that each Contributor library is expected 
 
 - An informative README with badges for the build status, latest release, latest Pursuit documentation, and current maintainer(s).
 - CHANGELOG and CONTRIBUTING files in the repository root.
-- A documentation directory containing extra library documentation like tutorials.
+- A documentation directory containing extra library documentation (like tutorials).
 - A `.github` directory containing issue and pull request templates and continuous integration via GitHub Actions and `setup-purescript`.
 - Various dotfiles, including standard `.gitignore` and `.editorconfig` files.
 
