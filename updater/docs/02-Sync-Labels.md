@@ -16,13 +16,13 @@ contrib-updater sync-labels \
   --owner purescript-contrib
   # Optional: Indicates that labels not in the standard Contributor set should
   # be removed from the repository. If omitted those labels will be preserved.
-  --delete-unused \
+  --delete-unused
 ```
 
 Example output:
 
 ```text
-Creating: "breaking change", "document me", "stale"
+Creating: "breaking change", "document me"
 Patching: "question", "help wanted", "enhancement"
 Deleting: "wontfix", "invalid", "duplicate"
 Successfully completed syncing labels.
