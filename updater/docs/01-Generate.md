@@ -71,8 +71,9 @@ The templates include default content that each Contributor library is expected 
 `base` includes content and configuration each Contributor library is expected to have.
 
 - An informative README with badges for the build status, latest release, latest Pursuit documentation, and current maintainer(s).
-- A documentation directory containing library documentation and a CHANGELOG (used to ensure releases are informative)
-- A `.github` directory containing issue and pull request templates, a contributors file, and continuous integration via GitHub Actions and `setup-purescript`
+- CHANGELOG and CONTRIBUTING files in the repository root.
+- A documentation directory containing extra library documentation (like tutorials).
+- A `.github` directory containing issue and pull request templates and continuous integration via GitHub Actions and `setup-purescript`.
 - Various dotfiles, including standard `.gitignore` and `.editorconfig` files.
 
 ### Layer 2: FFI
