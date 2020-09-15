@@ -85,7 +85,6 @@ runBaseTemplates = runTemplates baseTemplates
     , githubIssueChangeRequest
     , githubIssueConfig
     , githubWorkflowCI
-    , githubWorkflowStale
     , githubContributing
     , githubPullRequest
     ]
@@ -199,12 +198,6 @@ githubWorkflowCI :: Template
 githubWorkflowCI = Template
   { from: "base/.github/workflows/ci.yml"
   , to: ".github/workflows/ci.yml"
-  }
-
-githubWorkflowStale :: Template
-githubWorkflowStale = Template
-  { from: "base/.github/workflows/stale.yml"
-  , to: ".github/workflows/stale.yml"
   }
 
 githubContributing :: Template

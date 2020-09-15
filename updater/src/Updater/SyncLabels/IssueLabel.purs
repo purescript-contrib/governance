@@ -62,11 +62,4 @@ labels =
     , description: "Question that needs an answer"
     , color: "fbca04"
     }
-    -- This label needs to be treated with care because it is also used in the
-    -- 'Stale' GitHub Action. If it is updated here make sure to update the
-    -- template as well.
-  , { name: "stale"
-    , description: "This has become stale and will be closed without further activity"
-    , color: "ffffff"
-    }
   ]
