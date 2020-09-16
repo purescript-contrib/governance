@@ -17,7 +17,7 @@ Feel free to ask questions by opening an issue on the relevant library. Maintain
 
 ### I'd like to help, how do I pick something to work on?
 
-Any open issue that is not yet assigned to someone is good to work on! If it's your first time contributing it's probably best to pick an issue marked `good first issue`. In general, Contributors libraries follow these conventions:
+Any [open issue that is not yet assigned to someone](https://github.com/issues?q=is%3Aopen+is%3Aissue+archived%3Afalse+user%3Apurescript-contrib+no%3Aassignee) is good to work on! If it's your first time contributing it's probably best to pick an issue marked [`good first issue`](https://github.com/issues?q=is%3Aopen+is%3Aissue+archived%3Afalse+user%3Apurescript-contrib+no%3Aassignee+label%3A%22good+first+issue%22). In general, Contributors libraries follow these conventions:
 
 1. Issues marked `good first issue` are good for beginners and/or new contributors to the library.
 2. Issues marked `help wanted` signal that anyone can take the issue and it's a desired addition to the library.
