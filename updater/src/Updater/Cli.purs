@@ -70,7 +70,13 @@ command = OA.hsubparser $ fold
       , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]
 
-    in { usesJS, owner, mainBranch, displayName, displayTitle, maintainers }
+    files <- optional $ OA.some $ OA.strOption $ fold
+      [ OA.long "files"
+      , OA.metavar "FILE"
+      , OA.help "List of files to generate, instead of generating all the files in the tempalte: Ex: 'docs/README.md'"
+      ]
+
+  in { usesJS, owner, mainBranch, displayName, displayTitle, maintainers, files: files }
 
 -- type SyncLabelsOptions =
 --   { token :: String

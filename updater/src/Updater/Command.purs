@@ -22,6 +22,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
 import Effect.Class.Console (error, log)
+import Node.Path (FilePath)
 import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
@@ -53,6 +54,7 @@ type GenerateOptions =
   , displayName :: Maybe String
   , displayTitle :: Maybe String
   , maintainers :: NonEmptyList String
+  , files :: Maybe (NonEmptyList FilePath)
   }
 
 -- | Generate templates in the repository, backing up any conflicting files
@@ -77,6 +79,7 @@ runGenerate opts = do
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
       , displayTitle: fromMaybe (toTitleCase spago.name) opts.displayTitle
       , maintainers: map maintainerTemplate opts.maintainers
+      , files: opts.files
       }
 
   runBaseTemplates variables

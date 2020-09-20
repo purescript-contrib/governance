@@ -7,10 +7,12 @@ module Updater.Generate.Template
 import Prelude
 
 import Control.Alternative ((<|>))
-import Data.Foldable (traverse_)
+import Data.Array (filter)
+import Data.Foldable (traverse_, elem)
 import Data.Interpolate (i)
 import Data.List.NonEmpty as NEL
 import Data.List.Types (NonEmptyList)
+import Data.Maybe (Maybe, maybe)
 import Data.String as String
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -31,6 +33,7 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainers :: NonEmptyList String
+  , files :: Maybe (NonEmptyList FilePath)
   }
 
 -- | Replace each variable in the provided file contents, returning the updated
@@ -104,6 +107,10 @@ runJsTemplates = runTemplates jsTemplates
     , jsGitignore
     ]
 
+filterTemplates :: Array Template -> NonEmptyList FilePath -> Array Template
+filterTemplates templates toFilter =
+  filter (\(Template { from }) -> from `elem` toFilter) templates
+
 -- | The directory name where conflicting files will be stored when writing new
 -- | templates. Any existing files which a template would overwrite will be
 -- | copied into this directory.
@@ -112,7 +119,9 @@ backupsDirname = "backups"
 
 -- | Run a selection of templates.
 runTemplates :: Array Template -> Variables -> Aff Unit
-runTemplates templates variables = do
+runTemplates allTemplates variables = do
+  let templates = maybe allTemplates (filterTemplates allTemplates) variables.files
+
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
   let runTemplateOptions = { backupsDir, templatesDir, variables }
