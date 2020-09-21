@@ -50,7 +50,7 @@ run = launchAff_ <<< case _ of
 type GenerateOptions =
   { usesJS :: Boolean
   , owner :: Maybe String
-  , repo :: String
+  , repo :: Maybe String
   , mainBranch :: Maybe String
   , displayName :: Maybe String
   , displayTitle :: Maybe String
@@ -74,7 +74,7 @@ runGenerate opts = do
 
     variables =
       { owner: fromMaybe "purescript-contrib" opts.owner
-      , repo: opts.repo
+      , repo: fromMaybe ("purescript-" <> spago.name) opts.repo
       , mainBranch: fromMaybe "main" opts.mainBranch
       , packageName: spago.name
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName

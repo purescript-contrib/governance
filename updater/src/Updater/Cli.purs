@@ -46,7 +46,7 @@ command = OA.hsubparser $ fold
       , OA.help "The owner of this repository. Default: purescript-contrib"
       ]
 
-    repo <- OA.strOption $ fold
+    repo <- optional $ OA.strOption $ fold
       [ OA.long "repo"
       , OA.metavar "STRING"
       , OA.help "The repository to use for updating the changelog. Ex: purescript-machines"
