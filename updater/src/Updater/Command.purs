@@ -23,6 +23,7 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
 import Effect.Class.Console (error, log)
 import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
+import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -49,6 +50,7 @@ run = launchAff_ <<< case _ of
 type GenerateOptions =
   { usesJS :: Boolean
   , owner :: Maybe String
+  , repo :: String
   , mainBranch :: Maybe String
   , displayName :: Maybe String
   , displayTitle :: Maybe String
@@ -72,6 +74,7 @@ runGenerate opts = do
 
     variables =
       { owner: fromMaybe "purescript-contrib" opts.owner
+      , repo: opts.repo
       , mainBranch: fromMaybe "main" opts.mainBranch
       , packageName: spago.name
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
@@ -83,6 +86,8 @@ runGenerate opts = do
 
   when opts.usesJS do
     runJsTemplates variables
+
+  appendReleaseInfoToChangelog {owner: variables.owner, repo: spago.name }
 
   log
     """
