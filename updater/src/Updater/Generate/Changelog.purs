@@ -9,7 +9,7 @@ import Data.Codec.Argonaut (JsonCodec, array, printJsonDecodeError)
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Record as CAR
 import Data.Either (Either(..))
-import Data.Foldable (fold, for_)
+import Data.Foldable (foldl)
 import Data.String.CodeUnits (takeWhile)
 import Data.String.Common (joinWith, trim)
 import Effect.Aff (Aff, error, throwError)
@@ -47,12 +47,17 @@ appendReleaseInfoToChangelog gh = do
         Left e -> do
           throwError $ error $ printJsonDecodeError e
         Right releases -> do
-          for_ releases \rec -> do
-            let dateWithoutTimeZone = takeWhile (_ /= 'T') rec.published_at
-            FSA.appendTextFile UTF8 "./CHANGELOG.md" $ joinWith "\n"
-              [ "## [" <> rec.tag_name <> "](" <> rec.html_url <> ") - " <> dateWithoutTimeZone
-              , ""
-              , trim rec.body
-              , ""
-              , ""
-              ]
+          let appendContent = foldl addReleaseInfo "" releases
+          FSA.appendTextFile UTF8 "./CHANGELOG.md" appendContent
+
+  where
+    addReleaseInfo :: String -> ReleaseInfo -> String
+    addReleaseInfo acc rec =
+      let dateWithoutTimeZone = takeWhile (_ /= 'T') rec.published_at
+      in acc <> joinWith "\n"
+        [ "## [" <> rec.tag_name <> "](" <> rec.html_url <> ") - " <> dateWithoutTimeZone
+        , ""
+        , trim rec.body
+        , ""
+        , ""
+        ]
