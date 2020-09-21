@@ -1,7 +1,6 @@
 module Updater.Generate.Template
   ( Variables(..)
-  , runBaseTemplates
-  , runJsTemplates
+  , runTemplates
   ) where
 
 import Prelude
@@ -33,6 +32,7 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainers :: NonEmptyList String
+  , usesJS :: Boolean
   , files :: Maybe (NonEmptyList FilePath)
   }
 
@@ -71,45 +71,22 @@ replaceVariables vars contents = do
       (String.Pattern (format k))
       (String.Replacement (String.joinWith "\n" (NEL.toUnfoldable vs)))
 
--- | Generate the standard templates for a PureScript Contributor project into
--- | the correct file locations, backing up any existing files that would
--- | conflict (you will need to manually reconcile those files).
-runBaseTemplates :: Variables -> Aff Unit
-runBaseTemplates = runTemplates baseTemplates
-  where
-  baseTemplates :: Array Template
-  baseTemplates =
-    [ gitignore
-    , editorconfig
-    , repoReadme
-    , docsReadme
-    , docsChangelog
-    , githubIssueBugReport
-    , githubIssueChangeRequest
-    , githubIssueConfig
-    , githubWorkflowCI
-    , githubContributing
-    , githubPullRequest
-    ]
-
--- | Generate the templates for Contributor projects that rely on JS files (for
--- | example, via the FFI) into the correct file locations, backing up any
--- | existing files that would conflict (you will need to manually reconcile
--- | those files).
-runJsTemplates :: Variables -> Aff Unit
-runJsTemplates = runTemplates jsTemplates
-  where
-  jsTemplates :: Array Template
-  jsTemplates =
-    [ jsGithubWorkflowCI
-    , jsEslintrc
-    , jsPackageJson
-    , jsGitignore
-    ]
-
-filterTemplates :: Array Template -> NonEmptyList FilePath -> Array Template
-filterTemplates templates toFilter =
-  filter (\(Template { from }) -> from `elem` toFilter) templates
+templateSources :: Array TemplateSource
+templateSources =
+  [ gitignore
+  , repoReadme
+  , docsReadme
+  , docsChangelog
+  , githubIssueBugReport
+  , githubIssueChangeRequest
+  , githubIssueConfig
+  , githubContributing
+  , githubPullRequest
+  , editorconfig
+  , githubWorkflowCI
+  , jsEslintrc
+  , jsPackageJson
+  ]
 
 -- | The directory name where conflicting files will be stored when writing new
 -- | templates. Any existing files which a template would overwrite will be
@@ -117,10 +94,16 @@ filterTemplates templates toFilter =
 backupsDirname :: String
 backupsDirname = "backups"
 
--- | Run a selection of templates.
-runTemplates :: Array Template -> Variables -> Aff Unit
-runTemplates allTemplates variables = do
-  let templates = maybe allTemplates (filterTemplates allTemplates) variables.files
+-- | Generate the templates for a PureScript Contributor project into
+-- | the correct file locations, backing up any existing files that would
+-- | conflict (you will need to manually reconcile those files).
+runTemplates :: Variables -> Aff Unit
+runTemplates variables = do
+  let { files, usesJS } = variables
+      templates =
+        maybe templateSources (onlyGivenFiles templateSources) files
+          # filterByType usesJS
+          # map (templateFromSource usesJS)
 
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
@@ -163,75 +146,79 @@ runTemplate opts (Template { from, to }) = do
 
   FS.Extra.writeTextFile to (replaceVariables opts.variables templateContents)
 
+-- | Filter template sources by a list of files to include.
+onlyGivenFiles :: Array TemplateSource -> NonEmptyList FilePath -> Array TemplateSource
+onlyGivenFiles templates toFilter =
+  filter (\(TemplateSource _ path) ->  path `elem` toFilter) templates
+
+-- | Keep JS only templates when using JS.
+filterByType :: Boolean -> Array TemplateSource -> Array TemplateSource
+filterByType true templates = templates
+filterByType false templates = filter (not <<< sourceIsJS) templates
+
+sourceIsJS :: TemplateSource -> Boolean
+sourceIsJS = case _ of
+  (TemplateSource JS _) -> true
+  (TemplateSource _ _) -> false
+
+-- | Define the source and destination of a given template by its type and
+-- | source path. Common templates default to _base_ unless using JS.
+templateFromSource :: Boolean -> TemplateSource -> Template
+templateFromSource true (TemplateSource Common path) =
+  Template { from: "js/" <> path, to: path }
+templateFromSource false (TemplateSource Common path) =
+  Template { from: "base/" <> path, to: path }
+templateFromSource _ (TemplateSource JS path) =
+  Template { from: "js/" <> path, to: path }
+templateFromSource _ (TemplateSource Base path) =
+  Template { from: "base/" <> path, to: path }
+
+data TemplateType = Base | JS | Common
+
 -- | The source and destination for a given template. Templates will be copied
 -- | from their source to destination, with text replacement applied along the way.
 newtype Template = Template { from :: FilePath, to :: FilePath }
 
-gitignore :: Template
-gitignore = Template { from: "base/.gitignore", to: ".gitignore" }
+-- | The source and and type for a given template.
+data TemplateSource = TemplateSource TemplateType FilePath
 
-editorconfig :: Template
-editorconfig = Template { from: "base/.editorconfig", to: ".editorconfig" }
+gitignore :: TemplateSource
+gitignore = TemplateSource Common ".gitignore" 
 
-repoReadme :: Template
-repoReadme = Template { from: "base/README.md", to: "README.md" }
+editorconfig :: TemplateSource
+editorconfig = TemplateSource Base ".editorconfig"
 
-docsReadme :: Template
-docsReadme = Template { from: "base/docs/README.md", to: "docs/README.md" }
+repoReadme :: TemplateSource
+repoReadme = TemplateSource Base "README.md"
 
-docsChangelog :: Template
-docsChangelog = Template
-  { from: "base/CHANGELOG.md"
-  , to: "CHANGELOG.md"
-  }
+docsReadme :: TemplateSource
+docsReadme = TemplateSource Base "docs/README.md"
 
-githubIssueBugReport :: Template
-githubIssueBugReport = Template
-  { from: "base/.github/ISSUE_TEMPLATE/bug-report.md"
-  , to: ".github/ISSUE_TEMPLATE/bug-report.md"
-  }
+docsChangelog :: TemplateSource
+docsChangelog = TemplateSource Base "CHANGELOG.md"
 
-githubIssueChangeRequest :: Template
-githubIssueChangeRequest = Template
-  { from: "base/.github/ISSUE_TEMPLATE/change-request.md"
-  , to: ".github/ISSUE_TEMPLATE/change-request.md"
-  }
+githubWorkflowCI :: TemplateSource
+githubWorkflowCI = TemplateSource Common ".github/workflows/ci.yml"
 
-githubIssueConfig :: Template
-githubIssueConfig = Template
-  { from: "base/.github/ISSUE_TEMPLATE/config.yml"
-  , to: ".github/ISSUE_TEMPLATE/config.yml"
-  }
+githubIssueBugReport :: TemplateSource
+githubIssueBugReport =
+  TemplateSource Base ".github/ISSUE_TEMPLATE/bug-report.md"
 
-githubWorkflowCI :: Template
-githubWorkflowCI = Template
-  { from: "base/.github/workflows/ci.yml"
-  , to: ".github/workflows/ci.yml"
-  }
+githubIssueChangeRequest :: TemplateSource
+githubIssueChangeRequest =
+  TemplateSource Base ".github/ISSUE_TEMPLATE/change-request.md"
 
-githubContributing :: Template
-githubContributing = Template
-  { from: "base/CONTRIBUTING.md"
-  , to: "CONTRIBUTING.md"
-  }
+githubIssueConfig :: TemplateSource
+githubIssueConfig = TemplateSource Base ".github/ISSUE_TEMPLATE/config.yml"
 
-githubPullRequest :: Template
-githubPullRequest = Template
-  { from: "base/.github/PULL_REQUEST_TEMPLATE.md"
-  , to: ".github/PULL_REQUEST_TEMPLATE.md"
-  }
+githubContributing :: TemplateSource
+githubContributing = TemplateSource Base "CONTRIBUTING.md"
 
-jsGithubWorkflowCI :: Template
-jsGithubWorkflowCI = Template
-  { from: "js/.github/workflows/ci.yml"
-  , to: ".github/workflows/ci.yml"
-  }
+githubPullRequest :: TemplateSource
+githubPullRequest = TemplateSource Base ".github/PULL_REQUEST_TEMPLATE.md"
 
-jsEslintrc :: Template
-jsEslintrc = Template { from: "js/.eslintrc.json", to: ".eslintrc.json" }
+jsEslintrc :: TemplateSource
+jsEslintrc = TemplateSource JS ".eslintrc.json"
 
-jsPackageJson :: Template
-jsPackageJson = Template { from: "js/package.json", to: "package.json" }
-
-jsGitignore :: Template
-jsGitignore = Template { from: "js/.gitignore", to: ".gitignore" }
+jsPackageJson :: TemplateSource
+jsPackageJson = TemplateSource JS "package.json"

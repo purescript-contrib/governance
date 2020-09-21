@@ -23,7 +23,7 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
 import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
-import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
+import Updater.Generate.Template (runTemplates)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -79,13 +79,11 @@ runGenerate opts = do
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
       , displayTitle: fromMaybe (toTitleCase spago.name) opts.displayTitle
       , maintainers: map maintainerTemplate opts.maintainers
+      , usesJS: opts.usesJS
       , files: opts.files
       }
 
-  runBaseTemplates variables
-
-  when opts.usesJS do
-    runJsTemplates variables
+  runTemplates variables
 
   log
     """
