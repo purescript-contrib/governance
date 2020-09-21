@@ -31,6 +31,7 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainers :: NonEmptyList String
+  , repo :: String -- not used
   }
 
 -- | Replace each variable in the provided file contents, returning the updated
