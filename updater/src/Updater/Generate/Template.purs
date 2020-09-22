@@ -1,18 +1,23 @@
 module Updater.Generate.Template
   ( Variables(..)
+  , TemplateSource
   , runTemplates
+  , validateFiles
+  , allTemplates
   ) where
 
 import Prelude
 
 import Control.Alternative ((<|>))
-import Data.Array (filter)
-import Data.Foldable (traverse_, elem)
+import Data.Array (filter, fromFoldable)
+import Data.Either (Either(..))
+import Data.Foldable (find, traverse_)
 import Data.Interpolate (i)
 import Data.List.NonEmpty as NEL
 import Data.List.Types (NonEmptyList)
-import Data.Maybe (Maybe, maybe)
+import Data.Maybe (Maybe(..))
 import Data.String as String
+import Data.Traversable (traverse)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -33,7 +38,6 @@ type Variables =
   , displayTitle :: String
   , maintainers :: NonEmptyList String
   , usesJS :: Boolean
-  , files :: Maybe (NonEmptyList FilePath)
   }
 
 -- | Replace each variable in the provided file contents, returning the updated
@@ -71,8 +75,8 @@ replaceVariables vars contents = do
       (String.Pattern (format k))
       (String.Replacement (String.joinWith "\n" (NEL.toUnfoldable vs)))
 
-templateSources :: Array TemplateSource
-templateSources =
+allTemplates :: Array TemplateSource
+allTemplates =
   [ gitignore
   , repoReadme
   , docsReadme
@@ -97,17 +101,13 @@ backupsDirname = "backups"
 -- | Generate the templates for a PureScript Contributor project into
 -- | the correct file locations, backing up any existing files that would
 -- | conflict (you will need to manually reconcile those files).
-runTemplates :: Variables -> Aff Unit
-runTemplates variables = do
-  let { files, usesJS } = variables
-      templates =
-        maybe templateSources (onlyGivenFiles templateSources) files
-          # filterByType usesJS
-          # map (templateFromSource usesJS)
-
+runTemplates :: Variables -> Array TemplateSource -> Aff Unit
+runTemplates variables templateSources = do
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
   let runTemplateOptions = { backupsDir, templatesDir, variables }
+      templates = filterByType variables.usesJS templateSources
+                    # map (templateFromSource variables.usesJS)
   traverse_ (runTemplate runTemplateOptions) templates
   where
   getBackupsDirectory :: Aff FilePath
@@ -146,20 +146,10 @@ runTemplate opts (Template { from, to }) = do
 
   FS.Extra.writeTextFile to (replaceVariables opts.variables templateContents)
 
--- | Filter template sources by a list of files to include.
-onlyGivenFiles :: Array TemplateSource -> NonEmptyList FilePath -> Array TemplateSource
-onlyGivenFiles templates toFilter =
-  filter (\(TemplateSource _ path) ->  path `elem` toFilter) templates
-
 -- | Keep JS only templates when using JS.
 filterByType :: Boolean -> Array TemplateSource -> Array TemplateSource
 filterByType true templates = templates
-filterByType false templates = filter (not <<< sourceIsJS) templates
-
-sourceIsJS :: TemplateSource -> Boolean
-sourceIsJS = case _ of
-  (TemplateSource JS _) -> true
-  (TemplateSource _ _) -> false
+filterByType false templates = filter (not <<< (JS == _) <<< sourceType) templates
 
 -- | Define the source and destination of a given template by its type and
 -- | source path. Common templates default to _base_ unless using JS.
@@ -173,14 +163,35 @@ templateFromSource _ (TemplateSource JS path) =
 templateFromSource _ (TemplateSource Base path) =
   Template { from: "base/" <> path, to: path }
 
-data TemplateType = Base | JS | Common
+-- | Validate that the given paths of templates to run exist and for JS
+-- | templates that only are provided together with '--uses-js'
+validateFiles :: Boolean -> Array TemplateSource -> NonEmptyList FilePath -> Either String (Array TemplateSource)
+validateFiles usesJS templates files = fromFoldable <$> traverse validateFile files
+  where
+  validateFile :: FilePath -> Either String TemplateSource
+  validateFile path =
+    case find ((path == _) <<< sourcePath) templates of
+      Nothing -> Left $ "Path '" <> path <> "' is not a valid template"
+      Just (TemplateSource JS _) | not usesJS ->
+        Left $ "Path '" <> path <> "' is a JS only template. Did you forget '--uses-js'?"
+      Just template -> Right template
+
+data TemplateSourceType = Base | JS | Common
+
+derive instance eqTemplateSourceType :: Eq TemplateSourceType
 
 -- | The source and destination for a given template. Templates will be copied
 -- | from their source to destination, with text replacement applied along the way.
 newtype Template = Template { from :: FilePath, to :: FilePath }
 
 -- | The source and and type for a given template.
-data TemplateSource = TemplateSource TemplateType FilePath
+data TemplateSource = TemplateSource TemplateSourceType FilePath
+
+sourceType :: TemplateSource -> TemplateSourceType
+sourceType (TemplateSource t _) = t
+
+sourcePath :: TemplateSource -> FilePath
+sourcePath (TemplateSource _ path) = path
 
 gitignore :: TemplateSource
 gitignore = TemplateSource Common ".gitignore" 

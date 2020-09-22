@@ -14,7 +14,7 @@ import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Interpolate (i)
 import Data.List.Types (NonEmptyList)
-import Data.Maybe (Maybe, fromMaybe)
+import Data.Maybe (Maybe, fromMaybe, maybe)
 import Data.String (joinWith)
 import Data.String as String
 import Data.String.Extra as String.Extra
@@ -23,7 +23,7 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
 import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
-import Updater.Generate.Template (runTemplates)
+import Updater.Generate.Template (runTemplates, validateFiles, allTemplates)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -57,6 +57,18 @@ type GenerateOptions =
   , files :: Maybe (NonEmptyList FilePath)
   }
 
+successMsg :: String
+successMsg =
+    """
+    Finished generating files. You should verify any contents in the backups
+    directory and remove that directory before committing your changes.
+
+    !! NOT ALL CONTENT IS COMPLETE !!
+
+    You should now fill in the library's Summary and Quick Start sections in
+    the README.md file in the root of the repository.
+    """
+
 -- | Generate templates in the repository, backing up any conflicting files
 -- | that would be overwritten.
 runGenerate :: GenerateOptions -> Aff Unit
@@ -80,21 +92,17 @@ runGenerate opts = do
       , displayTitle: fromMaybe (toTitleCase spago.name) opts.displayTitle
       , maintainers: map maintainerTemplate opts.maintainers
       , usesJS: opts.usesJS
-      , files: opts.files
       }
 
-  runTemplates variables
+    validatedTemplates =
+      maybe (Right allTemplates) (validateFiles opts.usesJS allTemplates) opts.files
 
-  log
-    """
-    Finished generating files. You should verify any contents in the backups
-    directory and remove that directory before committing your changes.
+  case validatedTemplates of
+    Right templates -> do
+      runTemplates variables templates
+      log successMsg 
 
-    !! NOT ALL CONTENT IS COMPLETE !!
-
-    You should now fill in the library's Summary and Quick Start sections in
-    the README.md file in the root of the repository.
-    """
+    Left msg -> error msg
 
 type SyncLabelsOptions =
   { token :: String
