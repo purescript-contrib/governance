@@ -21,8 +21,10 @@ import Data.String.Extra as String.Extra
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
+import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
+import Node.Process (exit)
 import Updater.Generate.Template (runTemplates, validateFiles, allTemplates)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
@@ -102,7 +104,9 @@ runGenerate opts = do
       runTemplates variables templates
       log successMsg 
 
-    Left msg -> error msg
+    Left msg -> do
+       error msg
+       liftEffect $ exit 1
 
 type SyncLabelsOptions =
   { token :: String
