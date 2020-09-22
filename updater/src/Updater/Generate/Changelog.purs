@@ -13,9 +13,10 @@ import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (power)
-import Data.String.CodeUnits (takeWhile)
+import Data.String (Pattern(..))
+import Data.String.CodeUnits (drop, indexOf, length, takeWhile)
 import Data.String.Common (joinWith, trim)
-import Data.String.Utils (lines, startsWith)
+import Data.String.Utils (lines)
 import Effect.Aff (Aff, error, throwError)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff as FSA
@@ -62,20 +63,22 @@ appendReleaseInfoToChangelog gh = do
     fixHeaders :: String -> String
     fixHeaders s =
       let
-        incAllHeaderLevels =
-          incHeaderlevel 5
-            >>> incHeaderlevel 4
-            >>> incHeaderlevel 3
-            >>> incHeaderlevel 2
-            >>> incHeaderlevel 1
+        replaceAllHeaders =
+          replaceHeaderWithBoldedText 5
+            >>> replaceHeaderWithBoldedText 4
+            >>> replaceHeaderWithBoldedText 3
+            >>> replaceHeaderWithBoldedText 2
+            >>> replaceHeaderWithBoldedText 1
       in
-        joinWith "\n" $ map incAllHeaderLevels (lines s)
+        joinWith "\n" $ map replaceAllHeaders (lines s)
 
-    incHeaderlevel :: Int -> String -> String
-    incHeaderlevel level line =
-      if startsWith ((power "#" level) <> " ") line
-        then "#" <> line
-        else line
+    replaceHeaderWithBoldedText :: Int -> String -> String
+    replaceHeaderWithBoldedText level line =
+      let
+        prefix = (power "#" level) <> " "
+      in case indexOf (Pattern prefix) line of
+        Nothing -> line
+        Just _ -> "**" <> drop (length prefix) line <> "**"
 
 recursivelyFetchReleases :: forall r. Array ReleaseInfo -> Int -> { owner :: String, repo :: String | r } -> Aff (Array ReleaseInfo)
 recursivelyFetchReleases accumulator page gh = do
