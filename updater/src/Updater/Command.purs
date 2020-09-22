@@ -87,7 +87,7 @@ runGenerate opts = do
   when opts.usesJS do
     runJsTemplates variables
 
-  appendReleaseInfoToChangelog {owner: variables.owner, repo: spago.name }
+  appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
 
   log
     """
