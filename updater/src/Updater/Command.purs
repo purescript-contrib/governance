@@ -26,6 +26,7 @@ import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
 import Node.Process (exit)
 import Updater.Generate.Template (runTemplates, validateFiles, allTemplates)
+import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -52,6 +53,7 @@ run = launchAff_ <<< case _ of
 type GenerateOptions =
   { usesJS :: Boolean
   , owner :: Maybe String
+  , repo :: Maybe String
   , mainBranch :: Maybe String
   , displayName :: Maybe String
   , displayTitle :: Maybe String
@@ -88,6 +90,7 @@ runGenerate opts = do
 
     variables =
       { owner: fromMaybe "purescript-contrib" opts.owner
+      , repo: fromMaybe ("purescript-" <> spago.name) opts.repo
       , mainBranch: fromMaybe "main" opts.mainBranch
       , packageName: spago.name
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
@@ -107,6 +110,8 @@ runGenerate opts = do
     Left msg -> do
        error msg
        liftEffect $ exit 1
+
+  appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
 
 type SyncLabelsOptions =
   { token :: String

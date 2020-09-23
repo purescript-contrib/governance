@@ -38,6 +38,7 @@ type Variables =
   , displayTitle :: String
   , maintainers :: NonEmptyList String
   , usesJS :: Boolean
+  , repo :: String -- not used
   }
 
 -- | Replace each variable in the provided file contents, returning the updated

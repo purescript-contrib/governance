@@ -11,6 +11,7 @@
   , "optparse"
   , "psci-support"
   , "strings-extra"
+  , "stringutils"
   , "sunde"
   ]
 , packages = ./packages.dhall

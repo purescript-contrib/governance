@@ -49,6 +49,12 @@ command = OA.hsubparser $ fold
       , OA.help "The owner of this repository. Default: purescript-contrib"
       ]
 
+    repo <- optional $ OA.strOption $ fold
+      [ OA.long "repo"
+      , OA.metavar "STRING"
+      , OA.help "The repository to use for updating the changelog. Ex: purescript-machines"
+      ]
+
     mainBranch <- optional $ OA.strOption $ fold
       [ OA.long "main-branch"
       , OA.metavar "STRING"
@@ -79,14 +85,8 @@ command = OA.hsubparser $ fold
       , OA.help "Generate only these files from the template. Uses the JS version when --uses-js is true. Ex: 'README.md,docs/README.md'"
       ])
 
-  in { usesJS, owner, mainBranch, displayName, displayTitle, maintainers, files }
+    in { usesJS, owner, repo, mainBranch, displayName, displayTitle, maintainers, files }
 
--- type SyncLabelsOptions =
---   { token :: String
---   , repo :: String
---   , owner :: Maybe String
---   , deleteUnused :: Boolean
---   }
   syncLabels :: Parser Command
   syncLabels = map SyncLabels ado
     token <- OA.strOption $ fold
