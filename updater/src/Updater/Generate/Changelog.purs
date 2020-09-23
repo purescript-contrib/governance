@@ -111,5 +111,5 @@ fetchNextPageOfReleases page gh = do
           pure Nothing
         Right releases -> do
           pure $ Just releases
-    Right _ ->
-      pure Nothing
+    Right { status: StatusCode status } ->
+      throwError $ error $ "Failed to fetch releases. Status " <> show status
