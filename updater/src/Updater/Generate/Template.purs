@@ -1,6 +1,7 @@
 module Updater.Generate.Template
   ( Variables(..)
   , TemplateSource
+  , TemplateSourceType
   , runTemplates
   , validateFiles
   , allTemplates
@@ -107,8 +108,7 @@ runTemplates variables templateSources = do
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
   let runTemplateOptions = { backupsDir, templatesDir, variables }
-      templates = filterByType variables.usesJS templateSources
-                    # map (templateFromSource variables.usesJS)
+      templates = filterByType { usesJS: variables.usesJS, templates: templateSources }
   traverse_ (runTemplate runTemplateOptions) templates
   where
   getBackupsDirectory :: Aff FilePath
@@ -131,8 +131,10 @@ type RunTemplateOptions =
 -- | 2. Reading the contents of the template file
 -- | 3. Updating those contents by replacing any dynamic content (variables)
 -- | 4. Writing the new contents into the correct directory location
-runTemplate :: RunTemplateOptions -> Template -> Aff Unit
-runTemplate opts (Template { from, to }) = do
+runTemplate :: RunTemplateOptions -> TemplateSource -> Aff Unit
+runTemplate opts template = do
+  let from = templateSourcePath { usesJS: opts.variables.usesJS } template
+      to = template.destination
   templatePath <- liftEffect $ resolve [ opts.templatesDir ] from
   templateContents <- FS.readTextFile UTF8 templatePath
 
@@ -148,89 +150,86 @@ runTemplate opts (Template { from, to }) = do
   FS.Extra.writeTextFile to (replaceVariables opts.variables templateContents)
 
 -- | Keep JS only templates when using JS.
-filterByType :: Boolean -> Array TemplateSource -> Array TemplateSource
-filterByType true templates = templates
-filterByType false templates = filter (not <<< (JS == _) <<< sourceType) templates
+filterByType :: { usesJS :: Boolean, templates :: Array TemplateSource } -> Array TemplateSource
+filterByType { usesJS: true, templates } = templates
+filterByType { usesJS: false, templates } =
+  filter (not <<< (JS == _) <<< _.sourceType) templates
 
--- | Define the source and destination of a given template by its type and
--- | source path. Common templates default to _base_ unless using JS.
-templateFromSource :: Boolean -> TemplateSource -> Template
-templateFromSource true (TemplateSource Common path) =
-  Template { from: "js/" <> path, to: path }
-templateFromSource false (TemplateSource Common path) =
-  Template { from: "base/" <> path, to: path }
-templateFromSource _ (TemplateSource JS path) =
-  Template { from: "js/" <> path, to: path }
-templateFromSource _ (TemplateSource Base path) =
-  Template { from: "base/" <> path, to: path }
+-- | Define the source of a given template by its type and destination path.
+-- | Common templates default to base unless using JS.
+templateSourcePath :: { usesJS :: Boolean } -> TemplateSource -> FilePath
+templateSourcePath { usesJS: true } { sourceType: Common, destination } = "js/" <> destination
+templateSourcePath _ { sourceType: JS, destination } = "js/" <> destination
+templateSourcePath _ { destination } = "base/" <> destination
 
 -- | Validate that the given paths of templates to run exist and for JS
 -- | templates that only are provided together with '--uses-js'
-validateFiles :: Boolean -> Array TemplateSource -> NonEmptyList FilePath -> Either String (Array TemplateSource)
-validateFiles usesJS templates files = fromFoldable <$> traverse validateFile files
+validateFiles ::
+  { usesJS :: Boolean, templates :: Array TemplateSource } ->
+  NonEmptyList FilePath ->
+  Either String (Array TemplateSource)
+validateFiles { usesJS, templates } files = fromFoldable <$> traverse validateFile files
   where
   validateFile :: FilePath -> Either String TemplateSource
   validateFile path =
-    case find ((path == _) <<< sourcePath) templates of
+    case find ((path == _) <<< _.destination) templates of
       Nothing -> Left $ "Path '" <> path <> "' is not a valid template"
-      Just (TemplateSource JS _) | not usesJS ->
+      Just { sourceType: JS } | not usesJS ->
         Left $ "Path '" <> path <> "' is a JS only template. Did you forget '--uses-js'?"
       Just template -> Right template
 
+-- | Template types:
+-- |
+-- | - Base: standard template.
+-- | - JS: template project which relies on JS (for example via FFI)
+-- | - Common: common for both templates. Defaults to Base, unless using JS.
 data TemplateSourceType = Base | JS | Common
 
 derive instance eqTemplateSourceType :: Eq TemplateSourceType
 
--- | The source and destination for a given template. Templates will be copied
--- | from their source to destination, with text replacement applied along the way.
-newtype Template = Template { from :: FilePath, to :: FilePath }
-
--- | The source and and type for a given template.
-data TemplateSource = TemplateSource TemplateSourceType FilePath
-
-sourceType :: TemplateSource -> TemplateSourceType
-sourceType (TemplateSource t _) = t
-
-sourcePath :: TemplateSource -> FilePath
-sourcePath (TemplateSource _ path) = path
+-- | The source and type for a given template.
+type TemplateSource = { sourceType :: TemplateSourceType, destination :: FilePath }
 
 gitignore :: TemplateSource
-gitignore = TemplateSource Common ".gitignore" 
+gitignore =  { sourceType: Common, destination: ".gitignore" } 
 
 editorconfig :: TemplateSource
-editorconfig = TemplateSource Base ".editorconfig"
+editorconfig = { sourceType: Base, destination: ".editorconfig" }
 
 repoReadme :: TemplateSource
-repoReadme = TemplateSource Base "README.md"
+repoReadme = { sourceType: Base, destination: "README.md" }
 
 docsReadme :: TemplateSource
-docsReadme = TemplateSource Base "docs/README.md"
+docsReadme = { sourceType: Base, destination: "docs/README.md" }
 
 docsChangelog :: TemplateSource
-docsChangelog = TemplateSource Base "CHANGELOG.md"
+docsChangelog = { sourceType: Base, destination: "CHANGELOG.md" }
 
 githubWorkflowCI :: TemplateSource
-githubWorkflowCI = TemplateSource Common ".github/workflows/ci.yml"
+githubWorkflowCI =
+  { sourceType: Common, destination: ".github/workflows/ci.yml" }
 
 githubIssueBugReport :: TemplateSource
 githubIssueBugReport =
-  TemplateSource Base ".github/ISSUE_TEMPLATE/bug-report.md"
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/bug-report.md" }
 
 githubIssueChangeRequest :: TemplateSource
 githubIssueChangeRequest =
-  TemplateSource Base ".github/ISSUE_TEMPLATE/change-request.md"
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/change-request.md" }
 
 githubIssueConfig :: TemplateSource
-githubIssueConfig = TemplateSource Base ".github/ISSUE_TEMPLATE/config.yml"
+githubIssueConfig =
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/config.yml" }
 
 githubContributing :: TemplateSource
-githubContributing = TemplateSource Base "CONTRIBUTING.md"
+githubContributing = { sourceType: Base, destination: "CONTRIBUTING.md" }
 
 githubPullRequest :: TemplateSource
-githubPullRequest = TemplateSource Base ".github/PULL_REQUEST_TEMPLATE.md"
+githubPullRequest =
+  { sourceType: Base, destination: ".github/PULL_REQUEST_TEMPLATE.md" }
 
 jsEslintrc :: TemplateSource
-jsEslintrc = TemplateSource JS ".eslintrc.json"
+jsEslintrc = { sourceType: JS, destination: ".eslintrc.json" }
 
 jsPackageJson :: TemplateSource
-jsPackageJson = TemplateSource JS "package.json"
+jsPackageJson = { sourceType: JS, destination: "package.json" }

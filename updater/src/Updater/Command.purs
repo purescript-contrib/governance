@@ -25,8 +25,8 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
 import Node.Process (exit)
-import Updater.Generate.Template (runTemplates, validateFiles, allTemplates)
 import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
+import Updater.Generate.Template (allTemplates, runTemplates, validateFiles)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -100,7 +100,10 @@ runGenerate opts = do
       }
 
     validatedTemplates =
-      maybe (Right allTemplates) (validateFiles opts.usesJS allTemplates) opts.files
+      maybe
+        (Right allTemplates)
+        (validateFiles { usesJS: opts.usesJS, templates: allTemplates })
+        opts.files
 
   case validatedTemplates of
     Right templates -> do
