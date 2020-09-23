@@ -14,7 +14,7 @@ import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Interpolate (i)
 import Data.List.Types (NonEmptyList)
-import Data.Maybe (Maybe, fromMaybe, maybe)
+import Data.Maybe (Maybe, fromMaybe, isJust, maybe)
 import Data.String (joinWith)
 import Data.String as String
 import Data.String.Extra as String.Extra
@@ -26,7 +26,7 @@ import Effect.Class.Console (error, log)
 import Node.Path (FilePath)
 import Node.Process (exit)
 import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
-import Updater.Generate.Template (allTemplates, runTemplates, validateFiles)
+import Updater.Generate.Template (allTemplates, docsChangelog, runTemplates, validateFiles)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -97,11 +97,12 @@ runGenerate opts = do
     Right templates -> do
       runTemplates variables templates
 
+      when (isJust $ Array.find (_ == docsChangelog) templates) $
+        appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
+
     Left msg -> do
        error msg
        liftEffect $ exit 1
-
-  appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
 
   log
     """

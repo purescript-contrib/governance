@@ -2,9 +2,10 @@ module Updater.Generate.Template
   ( Variables(..)
   , TemplateSource
   , TemplateSourceType
+  , allTemplates
+  , docsChangelog
   , runTemplates
   , validateFiles
-  , allTemplates
   ) where
 
 import Prelude
