@@ -46,6 +46,12 @@ command = OA.hsubparser $ fold
       , OA.help "The owner of this repository. Default: purescript-contrib"
       ]
 
+    repo <- optional $ OA.strOption $ fold
+      [ OA.long "repo"
+      , OA.metavar "STRING"
+      , OA.help "The repository to use for updating the changelog. Ex: purescript-machines"
+      ]
+
     mainBranch <- optional $ OA.strOption $ fold
       [ OA.long "main-branch"
       , OA.metavar "STRING"
@@ -70,7 +76,7 @@ command = OA.hsubparser $ fold
       , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]
 
-    in { usesJS, owner, mainBranch, displayName, displayTitle, maintainers }
+    in { usesJS, owner, repo, mainBranch, displayName, displayTitle, maintainers }
 
 -- type SyncLabelsOptions =
 --   { token :: String
