@@ -165,15 +165,15 @@ templateSourcePath _ { destination } = "base/" <> destination
 
 -- | Validate that the given paths of templates to run exist and for JS
 -- | templates that only are provided together with '--uses-js'
-validateFiles ::
-  { usesJS :: Boolean, templates :: Array TemplateSource } ->
-  NonEmptyList FilePath ->
-  Either String (Array TemplateSource)
+validateFiles
+  :: { usesJS :: Boolean, templates :: Array TemplateSource }
+  -> NonEmptyList FilePath
+  -> Either String (Array TemplateSource)
 validateFiles { usesJS, templates } files = fromFoldable <$> traverse validateFile files
   where
   validateFile :: FilePath -> Either String TemplateSource
   validateFile path =
-    case find ((path == _) <<< _.destination) templates of
+    case find (eq path <<< _.destination) templates of
       Nothing -> Left $ "Path '" <> path <> "' is not a valid template"
       Just { sourceType: JS } | not usesJS ->
         Left $ "Path '" <> path <> "' is a JS only template. Did you forget '--uses-js'?"
@@ -192,7 +192,7 @@ derive instance eqTemplateSourceType :: Eq TemplateSourceType
 type TemplateSource = { sourceType :: TemplateSourceType, destination :: FilePath }
 
 gitignore :: TemplateSource
-gitignore =  { sourceType: Common, destination: ".gitignore" } 
+gitignore = { sourceType: Common, destination: ".gitignore" }
 
 editorconfig :: TemplateSource
 editorconfig = { sourceType: Base, destination: ".editorconfig" }
