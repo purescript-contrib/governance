@@ -4,6 +4,7 @@ import Prelude
 
 import Affjax as AX
 import Affjax.ResponseFormat as RF
+import Affjax.StatusCode (StatusCode(..))
 import Data.Array (filter, null)
 import Data.Codec (decode)
 import Data.Codec.Argonaut (JsonCodec, array, printJsonDecodeError)
@@ -18,6 +19,7 @@ import Data.String.CodeUnits (drop, indexOf, length, takeWhile)
 import Data.String.Common (joinWith, trim)
 import Data.String.Utils (lines)
 import Effect.Aff (Aff, error, throwError)
+import Effect.Class.Console as Console
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff as FSA
 
@@ -100,9 +102,12 @@ fetchNextPageOfReleases page gh = do
   case result of
     Left err -> do
       throwError (error $ AX.printError err)
-    Right { body } ->
+    Right { status } | status == (StatusCode 404) -> do
+      pure Nothing
+    Right { body, status } ->
       case decode (array releaseCodec) body of
         Left e -> do
+          Console.error "Failed to decode releases response"
           throwError $ error $ printJsonDecodeError e
         Right releases | null releases ->
           pure Nothing
