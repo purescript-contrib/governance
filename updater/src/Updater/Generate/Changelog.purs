@@ -102,7 +102,7 @@ fetchNextPageOfReleases page gh = do
   case result of
     Left err -> do
       throwError (error $ AX.printError err)
-    Right { body, status } | status == (StatusCode 200) ->
+    Right { body, status } | status == StatusCode 200 ->
       case decode (array releaseCodec) body of
         Left e -> do
           Console.error "Failed to decode releases response"

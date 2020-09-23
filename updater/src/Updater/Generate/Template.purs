@@ -154,7 +154,7 @@ runTemplate opts template = do
 filterByType :: { usesJS :: Boolean, templates :: Array TemplateSource } -> Array TemplateSource
 filterByType { usesJS: true, templates } = templates
 filterByType { usesJS: false, templates } =
-  filter (not <<< (JS == _) <<< _.sourceType) templates
+  filter (not <<< eq JS <<< _.sourceType) templates
 
 -- | Define the source of a given template by its type and destination path.
 -- | Common templates default to base unless using JS.
