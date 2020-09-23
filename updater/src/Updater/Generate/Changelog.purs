@@ -45,7 +45,10 @@ appendReleaseInfoToChangelog gh = do
   let
     realReleases = filter (\r -> r.draft == false) releases
     appendContent = foldl addReleaseInfo "" realReleases
-  FSA.appendTextFile UTF8 "./CHANGELOG.md" appendContent
+  FSA.appendTextFile UTF8 "./CHANGELOG.md" $ joinWith "\n"
+    [ ""
+    , appendContent
+    ]
   where
     addReleaseInfo :: String -> ReleaseInfo -> String
     addReleaseInfo acc rec =

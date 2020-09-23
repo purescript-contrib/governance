@@ -11,5 +11,3 @@ New features:
 Bugfixes:
 
 Other improvements:
-
-
