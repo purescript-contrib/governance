@@ -104,12 +104,14 @@ runGenerate opts = do
   appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
 
   log
-    """	
-    Finished generating files. You should verify any contents in the backups	
-    directory and remove that directory before committing your changes.	
-    !! NOT ALL CONTENT IS COMPLETE !!	
-    You should now fill in the library's Summary and Quick Start sections in	
-    the README.md file in the root of the repository.	
+    """
+    Finished generating files. You should verify any contents in the backups
+    directory and remove that directory before committing your changes.
+
+    !! NOT ALL CONTENT IS COMPLETE !!
+
+    You should now fill in the library's Summary and Quick Start sections in
+    the README.md file in the root of the repository.
     """
 
 type SyncLabelsOptions =
