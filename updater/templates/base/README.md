@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/{{owner}}/{{repo}}/workflows/CI/badge.svg?branch={{mainBranch}})](https://github.com/{{owner}}/{{repo}}/actions?query=workflow%3ACI+branch%3A{{mainBranch}})
 [![Release](https://img.shields.io/github/release/{{owner}}/{{repo}}.svg)](https://github.com/{{owner}}/{{repo}}/releases)
-[![Pursuit](https://pursuit.purescript.org/packages/{{repo}}/badge)](https://pursuit.purescript.org/packages/{{repo}})
+[![Pursuit](https://pursuit.purescript.org/packages/purescript-{{packageName}}/badge)](https://pursuit.purescript.org/packages/purescript-{{packageName}})
 {{maintainers}}
 
 The library summary hasn't been written yet (contributions are welcome!). The library summary describes the library's purpose in one to three sentences.
@@ -23,7 +23,7 @@ The quick start hasn't been written yet (contributions are welcome!). The quick 
 
 {{displayName}} documentation is stored in a few places:
 
-1. Module documentation is [published on Pursuit](https://pursuit.purescript.org/packages/{{repo}}).
+1. Module documentation is [published on Pursuit](https://pursuit.purescript.org/packages/purescript-{{packageName}}).
 2. Written documentation is kept in the [docs directory](./docs).
 3. Usage examples can be found in [the test suite](./test).
 
