@@ -1,17 +1,25 @@
 module Updater.Generate.Template
   ( Variables(..)
-  , runBaseTemplates
-  , runJsTemplates
+  , TemplateSource
+  , TemplateSourceType
+  , allTemplates
+  , docsChangelog
+  , runTemplates
+  , validateFiles
   ) where
 
 import Prelude
 
 import Control.Alternative ((<|>))
-import Data.Foldable (traverse_)
+import Data.Array (filter, fromFoldable)
+import Data.Either (Either(..))
+import Data.Foldable (find, traverse_)
 import Data.Interpolate (i)
 import Data.List.NonEmpty as NEL
 import Data.List.Types (NonEmptyList)
+import Data.Maybe (Maybe(..))
 import Data.String as String
+import Data.Traversable (traverse)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -31,6 +39,7 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainers :: NonEmptyList String
+  , usesJS :: Boolean
   , repo :: String -- not used
   }
 
@@ -69,41 +78,22 @@ replaceVariables vars contents = do
       (String.Pattern (format k))
       (String.Replacement (String.joinWith "\n" (NEL.toUnfoldable vs)))
 
--- | Generate the standard templates for a PureScript Contributor project into
--- | the correct file locations, backing up any existing files that would
--- | conflict (you will need to manually reconcile those files).
-runBaseTemplates :: Variables -> Aff Unit
-runBaseTemplates = runTemplates baseTemplates
-  where
-  baseTemplates :: Array Template
-  baseTemplates =
-    [ gitignore
-    , editorconfig
-    , repoReadme
-    , docsReadme
-    , docsChangelog
-    , githubIssueBugReport
-    , githubIssueChangeRequest
-    , githubIssueConfig
-    , githubWorkflowCI
-    , githubContributing
-    , githubPullRequest
-    ]
-
--- | Generate the templates for Contributor projects that rely on JS files (for
--- | example, via the FFI) into the correct file locations, backing up any
--- | existing files that would conflict (you will need to manually reconcile
--- | those files).
-runJsTemplates :: Variables -> Aff Unit
-runJsTemplates = runTemplates jsTemplates
-  where
-  jsTemplates :: Array Template
-  jsTemplates =
-    [ jsGithubWorkflowCI
-    , jsEslintrc
-    , jsPackageJson
-    , jsGitignore
-    ]
+allTemplates :: Array TemplateSource
+allTemplates =
+  [ gitignore
+  , repoReadme
+  , docsReadme
+  , docsChangelog
+  , githubIssueBugReport
+  , githubIssueChangeRequest
+  , githubIssueConfig
+  , githubContributing
+  , githubPullRequest
+  , editorconfig
+  , githubWorkflowCI
+  , jsEslintrc
+  , jsPackageJson
+  ]
 
 -- | The directory name where conflicting files will be stored when writing new
 -- | templates. Any existing files which a template would overwrite will be
@@ -111,12 +101,15 @@ runJsTemplates = runTemplates jsTemplates
 backupsDirname :: String
 backupsDirname = "backups"
 
--- | Run a selection of templates.
-runTemplates :: Array Template -> Variables -> Aff Unit
-runTemplates templates variables = do
+-- | Generate the templates for a PureScript Contributor project into
+-- | the correct file locations, backing up any existing files that would
+-- | conflict (you will need to manually reconcile those files).
+runTemplates :: Variables -> Array TemplateSource -> Aff Unit
+runTemplates variables templateSources = do
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
   let runTemplateOptions = { backupsDir, templatesDir, variables }
+      templates = filterByType { usesJS: variables.usesJS, templates: templateSources }
   traverse_ (runTemplate runTemplateOptions) templates
   where
   getBackupsDirectory :: Aff FilePath
@@ -139,8 +132,10 @@ type RunTemplateOptions =
 -- | 2. Reading the contents of the template file
 -- | 3. Updating those contents by replacing any dynamic content (variables)
 -- | 4. Writing the new contents into the correct directory location
-runTemplate :: RunTemplateOptions -> Template -> Aff Unit
-runTemplate opts (Template { from, to }) = do
+runTemplate :: RunTemplateOptions -> TemplateSource -> Aff Unit
+runTemplate opts template = do
+  let from = templateSourcePath { usesJS: opts.variables.usesJS } template
+      to = template.destination
   templatePath <- liftEffect $ resolve [ opts.templatesDir ] from
   templateContents <- FS.readTextFile UTF8 templatePath
 
@@ -155,75 +150,87 @@ runTemplate opts (Template { from, to }) = do
 
   FS.Extra.writeTextFile to (replaceVariables opts.variables templateContents)
 
--- | The source and destination for a given template. Templates will be copied
--- | from their source to destination, with text replacement applied along the way.
-newtype Template = Template { from :: FilePath, to :: FilePath }
+-- | Keep JS only templates when using JS.
+filterByType :: { usesJS :: Boolean, templates :: Array TemplateSource } -> Array TemplateSource
+filterByType { usesJS: true, templates } = templates
+filterByType { usesJS: false, templates } =
+  filter (not eq JS <<< _.sourceType) templates
 
-gitignore :: Template
-gitignore = Template { from: "base/.gitignore", to: ".gitignore" }
+-- | Define the source of a given template by its type and destination path.
+-- | Common templates default to base unless using JS.
+templateSourcePath :: { usesJS :: Boolean } -> TemplateSource -> FilePath
+templateSourcePath { usesJS: true } { sourceType: Common, destination } = "js/" <> destination
+templateSourcePath _ { sourceType: JS, destination } = "js/" <> destination
+templateSourcePath _ { destination } = "base/" <> destination
 
-editorconfig :: Template
-editorconfig = Template { from: "base/.editorconfig", to: ".editorconfig" }
+-- | Validate that the given paths of templates to run exist and for JS
+-- | templates that only are provided together with '--uses-js'
+validateFiles
+  :: { usesJS :: Boolean, templates :: Array TemplateSource }
+  -> NonEmptyList FilePath
+  -> Either String (Array TemplateSource)
+validateFiles { usesJS, templates } files = fromFoldable <$> traverse validateFile files
+  where
+  validateFile :: FilePath -> Either String TemplateSource
+  validateFile path =
+    case find (eq path <<< _.destination) templates of
+      Nothing -> Left $ "Path '" <> path <> "' is not a valid template"
+      Just { sourceType: JS } | not usesJS ->
+        Left $ "Path '" <> path <> "' is a JS only template. Did you forget '--uses-js'?"
+      Just template -> Right template
 
-repoReadme :: Template
-repoReadme = Template { from: "base/README.md", to: "README.md" }
+-- | Template types:
+-- |
+-- | - Base: standard template.
+-- | - JS: template project which relies on JS (for example via FFI)
+-- | - Common: common for both templates. Defaults to Base, unless using JS.
+data TemplateSourceType = Base | JS | Common
 
-docsReadme :: Template
-docsReadme = Template { from: "base/docs/README.md", to: "docs/README.md" }
+derive instance eqTemplateSourceType :: Eq TemplateSourceType
 
-docsChangelog :: Template
-docsChangelog = Template
-  { from: "base/CHANGELOG.md"
-  , to: "CHANGELOG.md"
-  }
+-- | The source and type for a given template.
+type TemplateSource = { sourceType :: TemplateSourceType, destination :: FilePath }
 
-githubIssueBugReport :: Template
-githubIssueBugReport = Template
-  { from: "base/.github/ISSUE_TEMPLATE/bug-report.md"
-  , to: ".github/ISSUE_TEMPLATE/bug-report.md"
-  }
+gitignore :: TemplateSource
+gitignore = { sourceType: Common, destination: ".gitignore" }
 
-githubIssueChangeRequest :: Template
-githubIssueChangeRequest = Template
-  { from: "base/.github/ISSUE_TEMPLATE/change-request.md"
-  , to: ".github/ISSUE_TEMPLATE/change-request.md"
-  }
+editorconfig :: TemplateSource
+editorconfig = { sourceType: Base, destination: ".editorconfig" }
 
-githubIssueConfig :: Template
-githubIssueConfig = Template
-  { from: "base/.github/ISSUE_TEMPLATE/config.yml"
-  , to: ".github/ISSUE_TEMPLATE/config.yml"
-  }
+repoReadme :: TemplateSource
+repoReadme = { sourceType: Base, destination: "README.md" }
 
-githubWorkflowCI :: Template
-githubWorkflowCI = Template
-  { from: "base/.github/workflows/ci.yml"
-  , to: ".github/workflows/ci.yml"
-  }
+docsReadme :: TemplateSource
+docsReadme = { sourceType: Base, destination: "docs/README.md" }
 
-githubContributing :: Template
-githubContributing = Template
-  { from: "base/CONTRIBUTING.md"
-  , to: "CONTRIBUTING.md"
-  }
+docsChangelog :: TemplateSource
+docsChangelog = { sourceType: Base, destination: "CHANGELOG.md" }
 
-githubPullRequest :: Template
-githubPullRequest = Template
-  { from: "base/.github/PULL_REQUEST_TEMPLATE.md"
-  , to: ".github/PULL_REQUEST_TEMPLATE.md"
-  }
+githubWorkflowCI :: TemplateSource
+githubWorkflowCI =
+  { sourceType: Common, destination: ".github/workflows/ci.yml" }
 
-jsGithubWorkflowCI :: Template
-jsGithubWorkflowCI = Template
-  { from: "js/.github/workflows/ci.yml"
-  , to: ".github/workflows/ci.yml"
-  }
+githubIssueBugReport :: TemplateSource
+githubIssueBugReport =
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/bug-report.md" }
 
-jsEslintrc :: Template
-jsEslintrc = Template { from: "js/.eslintrc.json", to: ".eslintrc.json" }
+githubIssueChangeRequest :: TemplateSource
+githubIssueChangeRequest =
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/change-request.md" }
 
-jsPackageJson :: Template
-jsPackageJson = Template { from: "js/package.json", to: "package.json" }
+githubIssueConfig :: TemplateSource
+githubIssueConfig =
+  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/config.yml" }
 
-jsGitignore :: Template
-jsGitignore = Template { from: "js/.gitignore", to: ".gitignore" }
+githubContributing :: TemplateSource
+githubContributing = { sourceType: Base, destination: "CONTRIBUTING.md" }
+
+githubPullRequest :: TemplateSource
+githubPullRequest =
+  { sourceType: Base, destination: ".github/PULL_REQUEST_TEMPLATE.md" }
+
+jsEslintrc :: TemplateSource
+jsEslintrc = { sourceType: JS, destination: ".eslintrc.json" }
+
+jsPackageJson :: TemplateSource
+jsPackageJson = { sourceType: JS, destination: "package.json" }

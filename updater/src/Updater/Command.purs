@@ -14,16 +14,19 @@ import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Interpolate (i)
 import Data.List.Types (NonEmptyList)
-import Data.Maybe (Maybe, fromMaybe)
+import Data.Maybe (Maybe, fromMaybe, isJust, maybe)
 import Data.String (joinWith)
 import Data.String as String
 import Data.String.Extra as String.Extra
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff as Aff
+import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log)
-import Updater.Generate.Template (runBaseTemplates, runJsTemplates)
+import Node.Path (FilePath)
+import Node.Process (exit)
 import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
+import Updater.Generate.Template (allTemplates, docsChangelog, runTemplates, validateFiles)
 import Updater.SyncLabels.Request (IssueLabelRequestOpts)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
@@ -55,6 +58,7 @@ type GenerateOptions =
   , displayName :: Maybe String
   , displayTitle :: Maybe String
   , maintainers :: NonEmptyList String
+  , files :: Maybe (NonEmptyList FilePath)
   }
 
 -- | Generate templates in the repository, backing up any conflicting files
@@ -80,14 +84,25 @@ runGenerate opts = do
       , displayName: fromMaybe ("`" <> spago.name <> "`") opts.displayName
       , displayTitle: fromMaybe (toTitleCase spago.name) opts.displayTitle
       , maintainers: map maintainerTemplate opts.maintainers
+      , usesJS: opts.usesJS
       }
 
-  runBaseTemplates variables
+    validatedTemplates =
+      maybe
+        (Right allTemplates)
+        (validateFiles { usesJS: opts.usesJS, templates: allTemplates })
+        opts.files
 
-  when opts.usesJS do
-    runJsTemplates variables
+  case validatedTemplates of
+    Right templates -> do
+      runTemplates variables templates
 
-  appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
+      when (isJust $ Array.find (eq docsChangelog) templates) $
+        appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
+
+    Left msg -> do
+       error msg
+       liftEffect $ exit 1
 
   log
     """

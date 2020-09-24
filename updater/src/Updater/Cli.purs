@@ -5,11 +5,14 @@ module Updater.Cli
 import Prelude
 
 import Data.Foldable (fold)
+import Data.List.NonEmpty (fromFoldable)
 import Data.Maybe (optional)
+import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Options.Applicative (Parser, (<**>))
 import Options.Applicative as OA
 import Updater.Command (Command(..))
+import Updater.Utils.Options (multiString)
 
 -- | Parse command line arguments into a valid `Command`, if possible, or
 -- | display the help menu or an error if the parser fails.
@@ -76,14 +79,14 @@ command = OA.hsubparser $ fold
       , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]
 
-    in { usesJS, owner, repo, mainBranch, displayName, displayTitle, maintainers }
+    files <- (fromFoldable =<< _) <$> (optional $ OA.option (multiString $ Pattern ",") $ fold
+      [ OA.long "files"
+      , OA.metavar "file1,..,fileN"
+      , OA.help "Generate only these files from the template. Uses the JS version when --uses-js is true. Ex: 'README.md,docs/README.md'"
+      ])
 
--- type SyncLabelsOptions =
---   { token :: String
---   , repo :: String
---   , owner :: Maybe String
---   , deleteUnused :: Boolean
---   }
+    in { usesJS, owner, repo, mainBranch, displayName, displayTitle, maintainers, files }
+
   syncLabels :: Parser Command
   syncLabels = map SyncLabels ado
     token <- OA.strOption $ fold
