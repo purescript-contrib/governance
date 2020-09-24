@@ -24,6 +24,7 @@ contrib-updater generate \
   # generated as well as the standard templates.
   --uses-js \
   --owner purescript-contrib \
+  --repo purescript-argonaut-codecs \
   --main-branch main \
   --display-name '`argonaut-codecs`' \
   --display-title 'Argonaut Codecs' \
@@ -50,12 +51,14 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainer :: NonEmptyList String
+  , repo :: String
   }
 ```
 
 - `owner` refers to the owner of the repository being updated. Defaults in the CLI to `"purescript-contrib"`.
 - `mainBranch` refers to the primary branch used in the repository. Defaults in the CLI to `"main"`, but some libraries may need to use `"master"` instead.
 - `packageName` refers to the package name as represented in the PureScript registry and Spago installation instructions. This is pulled automatically from the `spago.dhall` file.
+- `repo` refers to the repository containing the package. Defaults in the CLI to `"purescript-{{packageName}}"`, re-using the package name as represented in the PureScript registry.
 - `displayName` refers to the way you'd like to render the package name in markdown files. Defaults in the CLI to the name of the package in backticks, ie. `argonaut-codecs`, but it's also common to provide a string (for example, Argonaut Codecs) instead.
 - `displayTitle` refers to the way you'd like to render the package name in markdown titles. Defaults in the CLI to the name of the package in title case.
 - `maintainer` refers to the assigned maintainer(s) for the library (ex: `"thomashoneyman"`). This is required in the CLI.

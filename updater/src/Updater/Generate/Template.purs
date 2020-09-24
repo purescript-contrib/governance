@@ -39,8 +39,8 @@ type Variables =
   , displayName :: String
   , displayTitle :: String
   , maintainers :: NonEmptyList String
+  , repo :: String
   , usesJS :: Boolean
-  , repo :: String -- not used
   }
 
 -- | Replace each variable in the provided file contents, returning the updated
@@ -53,6 +53,7 @@ replaceVariables vars contents = do
     # replaceOne "packageName" vars.packageName
     # replaceOne "displayName" vars.displayName
     # replaceOne "displayTitle" vars.displayTitle
+    # replaceOne "repo" vars.repo
     # replaceMany "maintainers" vars.maintainers
   where
   format str = i "{{" str "}}"
@@ -226,8 +227,7 @@ githubContributing :: TemplateSource
 githubContributing = { sourceType: Base, destination: "CONTRIBUTING.md" }
 
 githubPullRequest :: TemplateSource
-githubPullRequest =
-  { sourceType: Base, destination: ".github/PULL_REQUEST_TEMPLATE.md" }
+githubPullRequest = { sourceType: Base, destination: ".github/PULL_REQUEST_TEMPLATE.md" }
 
 jsEslintrc :: TemplateSource
 jsEslintrc = { sourceType: JS, destination: ".eslintrc.json" }

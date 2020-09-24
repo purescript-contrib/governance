@@ -1,7 +1,7 @@
 # {{displayTitle}}
 
-[![CI](https://github.com/{{owner}}/purescript-{{packageName}}/workflows/CI/badge.svg?branch={{mainBranch}})](https://github.com/{{owner}}/purescript-{{packageName}}/actions?query=workflow%3ACI+branch%3A{{mainBranch}})
-[![Release](https://img.shields.io/github/release/{{owner}}/purescript-{{packageName}}.svg)](https://github.com/{{owner}}/purescript-{{packageName}}/releases)
+[![CI](https://github.com/{{owner}}/{{repo}}/workflows/CI/badge.svg?branch={{mainBranch}})](https://github.com/{{owner}}/{{repo}}/actions?query=workflow%3ACI+branch%3A{{mainBranch}})
+[![Release](https://img.shields.io/github/release/{{owner}}/{{repo}}.svg)](https://github.com/{{owner}}/{{repo}}/releases)
 [![Pursuit](https://pursuit.purescript.org/packages/purescript-{{packageName}}/badge)](https://pursuit.purescript.org/packages/purescript-{{packageName}})
 {{maintainers}}
 
@@ -29,14 +29,14 @@ The quick start hasn't been written yet (contributions are welcome!). The quick 
 
 If you get stuck, there are several ways to get help:
 
-- [Open an issue](https://github.com/{{owner}}/purescript-{{packageName}}/issues) if you have encountered a bug or problem.
+- [Open an issue](https://github.com/{{owner}}/{{repo}}/issues) if you have encountered a bug or problem.
 - [Search or start a thread on the PureScript Discourse](https://discourse.purescript.org) if you have general questions. You can also ask questions in the `#purescript` and `#purescript-beginners` channels on the [Functional Programming Slack](https://functionalprogramming.slack.com) ([invite link](https://fpchat-invite.herokuapp.com/)).
 
 ## Contributing
 
 You can contribute to {{displayName}} in several ways:
 
-1. If you encounter a problem or have a question, please [open an issue](https://github.com/{{owner}}/purescript-{{packageName}}/issues). We'll do our best to work with you to resolve or answer it.
+1. If you encounter a problem or have a question, please [open an issue](https://github.com/{{owner}}/{{repo}}/issues). We'll do our best to work with you to resolve or answer it.
 
 2. If you would like to contribute code, tests, or documentation, please [read the contributor guide](./CONTRIBUTING.md). It's a short, helpful introduction to contributing to this library, including development instructions.
 
