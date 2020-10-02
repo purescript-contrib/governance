@@ -98,7 +98,7 @@ runGenerate opts = do
       runTemplates variables templates
 
       when (isJust $ Array.find (eq docsChangelog) templates) $
-        appendReleaseInfoToChangelog { owner: variables.owner, repo: spago.name }
+        appendReleaseInfoToChangelog { owner: variables.owner, repo: variables.repo }
 
     Left msg -> do
        error msg
