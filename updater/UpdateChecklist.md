@@ -1,3 +1,4 @@
+
 # Contributor Library Update Checklist
 One goal of the Contributors working group is to make sure that the `purescript-contrib` libraries all meet the [library guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md). This includes adequate tests, documentation, and tooling (using Spago, using the same issue labels, and so on). The [contrib updater](https://github.com/purescript-contrib/governance/tree/main/updater) tool can help with this migration and it has documentation on correct use (see [the readme](https://github.com/purescript-contrib/governance/tree/main/updater#updater) for more).
 
@@ -91,12 +92,12 @@ First, does the package have any tests? (JS Timers does, so no problem here.)
 ```
 # Repository doesn't have tests
 **Is your change request related to a problem? Please describe.**
-As described in the [tests section of the Library Guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md#tests), Contributors libraries ar expected to have tests exercised in CI on pull requests and the main branch.
+As described in the [tests section of the Library Guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md#tests), Contributors libraries are expected to have tests exercised in CI on pull requests and the main branch.
 
-This library currently doesn't have tests.
+This library currently doesn't have any real tests.
 
 **Describe the solution you'd like**
-There should be at least one test in the `test` directory. It can be a minimal usage example similar to the quick start in the repository README.
+There should be at least one real test in the [test](../blob/main/test) directory. It can be a minimal usage example similar to the quick start in the repository README.
 
 **Additional context**
 See the [Governance repository](https://github.com/purescript-contrib/governance) for more information about requirements in the Contributors organization.
@@ -108,7 +109,7 @@ Second, does the package README have quick start documentation to get a new user
 **Is your change request related to a problem? Please describe.**
 As described in the [documentation section of the Library Guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md#documentation), Contributors libraries are expected to have in their README a short summary of the library's purpose, installation instructions, a quick start with a minimal usage example, and links to the documentation and contributing guide.
 
-This library currently doesn't have a quick start in the README.
+This library currently doesn't have a completed [quick start](../#quick-start) in the README.
 
 **Describe the solution you'd like**
 The library needs a quick start section after the installation instructions. [argonaut-codecs](https://github.com/purescript-contrib/purescript-argonaut-codecs#quick-start) is one example of a library with a quick start.
@@ -132,16 +133,16 @@ The library needs to have documentation comments on the majority (and preferably
 See the [Governance repository](https://github.com/purescript-contrib/governance) for more information about requirements in the Contributors organization.
 ```
 
-Fourth, does the package have any documentation in the docs directory, or anything in the changelog? (Pretty much no libraries will have anything in the changelog. I’m not sure how best to handle that.)
+Fourth, does the package have good documentation in the docs directory.
 ```
 # Library has inadequate documentation in the docs directory
 **Is your change request related to a problem? Please describe.**
-As described in the [documentation section of the Library Guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md#documentation), Contributors libraries are expected to have some documentation in the docs directory -- specifically, a changelog and at least a short tutorial that expands on the quick start in the README.
+As described in the [documentation section of the Library Guidelines](https://github.com/purescript-contrib/governance/blob/main/library-guidelines.md#documentation), Contributors libraries are expected to have some documentation in the docs directory -- specifically, at least a short tutorial that expands on the quick start in the README.
 
-This library currently doesn't have an up to date changelog or any extra documentation in the docs directory.
+This library currently doesn't have comprehensive documentation in the [docs](../blob/main/docs) directory.
 
 **Describe the solution you'd like**
-The changelog needs to be updated for at least the most recent release (we can then start curating it going forward) and at least a short tutorial needs to be added to the docs directory, or other documentation [as described in this Divio article](https://documentation.divio.com).
+At least a short tutorial needs to be added to the docs directory, or other documentation [as described in this Divio article](https://documentation.divio.com).
 
 The [argonaut-codecs docs directory](https://github.com/purescript-contrib/purescript-argonaut-codecs/tree/master/docs) has a good example of expanded documentation for a Contributor library. But it would even be useful to add something considerably smaller and shorter to this library.
 
