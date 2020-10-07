@@ -55,7 +55,7 @@ labels =
     , color: "7057ff"
     }
   , { name: "help wanted"
-    , description: "Maintainers would like a PR that solves this issue"
+    , description: "Maintainers would like assistance with solving this issue"
     , color: "006b75"
     }
   , { name: "question"
