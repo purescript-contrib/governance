@@ -51,17 +51,7 @@ Each library also contains some standard directories, including:
 
 #### Standard Labels
 
-Labels are a big part of curating the issue tracker in a Contributors library. Labels are regularly, automatically synced via the [contrib-updater](./updater) CLI tool, which will set labels, colors, and descriptions across repositories.
-
-We use several standard labels for issues of various types:
-
-- `bug` is used for issues that point out a legitimate bug in the library that ought to be fixed
-- `document me` is used for issues that indicate documentation needs to be updated, or for issues with great content that ought to be added to the documentation.
-- `enhancement` is used for issues or pull requests that represent an addition to the library
-- `good first issue` is used to label tasks that are good for beginners to take on. This is one of the best ways to encourage new contributions to the PureScript ecosystem!
-- `help wanted` is used as a call to action to indicate that the maintainers would like a PR that solves this issue.
-
-Further issues can be found on [this repository's issue labels page](https://github.com/purescript-contrib/governance/issues/labels).
+Labels are a big part of curating the issue tracker in a Contributors library. Labels are regularly and automatically synced via the [contrib-updater](./updater) CLI tool, which will set labels, colors, and descriptions across repositories. We use several standard labels for issues of various types. They can be found on [this repository's issue labels page](https://github.com/purescript-contrib/governance/issues/labels). For instructions on how to update labels across all Contributor libraries see the [Sync Labels documentation](./updater/docs/02-Sync-Labels.md).
 
 ## Expectations for Maintainers
 

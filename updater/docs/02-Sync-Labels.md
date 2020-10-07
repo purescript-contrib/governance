@@ -30,4 +30,4 @@ Successfully completed syncing labels.
 
 ## Updating Labels
 
-The set of labels used in the Contributors libraries is maintained by the `SyncLabels` command and should be updated in the source code if you need to make a change.
+The set of labels used in the Contributors libraries is maintained by the `SyncLabels` command and should be updated in the [source code](../src/Updater/SyncLabels/IssueLabel.purs) if you need to make a change.

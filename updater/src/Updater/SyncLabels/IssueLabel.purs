@@ -35,11 +35,11 @@ issueLabelCodec =
 labels :: Array IssueLabel
 labels =
   [ { name: "breaking change"
-    , description: "Change will require a major version bump"
+    , description: "A change that requires a major version bump"
     , color: "e99695"
     }
   , { name: "bug"
-    , description: "Something isn't working"
+    , description: "A legitimate bug in the library that ought to be fixed"
     , color: "d73a4a"
     }
   , { name: "document me"
@@ -47,7 +47,7 @@ labels =
     , color: "0075ca"
     }
   , { name: "enhancement"
-    , description: "New feature or request"
+    , description: "An addition to the library"
     , color: "a6e1ea"
     }
   , { name: "good first issue"
@@ -55,7 +55,7 @@ labels =
     , color: "7057ff"
     }
   , { name: "help wanted"
-    , description: "Extra attention is needed"
+    , description: "Maintainers would like assistance with solving this issue"
     , color: "006b75"
     }
   , { name: "question"
