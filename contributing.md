@@ -13,7 +13,7 @@ Everyone is welcome! People of all experience levels can join, begin contributin
 Feel free to ask questions by opening an issue on the relevant library. Maintainers are also active on:
 
 - The [PureScript Discourse](https://discourse.purescript.org) (the most popular option and best for detailed questions)
-- The [Purescript Discord](https://purescript.org/chat) in the `#help-language`, `#help-code` and `#help-tools` channels (best for quick, informal questions)
+- The [Purescript Discord](https://purescript.org/chat) where you can ask questions and have live discussions.
 
 ### I'd like to help, how do I pick something to work on?
 
