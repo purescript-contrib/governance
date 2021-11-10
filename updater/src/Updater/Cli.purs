@@ -79,11 +79,13 @@ command = OA.hsubparser $ fold
       , OA.help "The assigned maintainer(s) for this repository (required). Ex: 'thomashoneyman'"
       ]
 
-    files <- (fromFoldable =<< _) <$> (optional $ OA.option (multiString $ Pattern ",") $ fold
-      [ OA.long "files"
-      , OA.metavar "file1,..,fileN"
-      , OA.help "Generate only these files from the template. Uses the JS version when --uses-js is true. Ex: 'README.md,docs/README.md'"
-      ])
+    files <- (fromFoldable =<< _) <$>
+      ( optional $ OA.option (multiString $ Pattern ",") $ fold
+          [ OA.long "files"
+          , OA.metavar "file1,..,fileN"
+          , OA.help "Generate only these files from the template. Uses the JS version when --uses-js is true. Ex: 'README.md,docs/README.md'"
+          ]
+      )
 
     in { usesJS, owner, repo, mainBranch, displayName, displayTitle, maintainers, files }
 

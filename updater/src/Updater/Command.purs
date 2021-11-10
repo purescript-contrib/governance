@@ -101,8 +101,8 @@ runGenerate opts = do
         appendReleaseInfoToChangelog { owner: variables.owner, repo: variables.repo }
 
     Left msg -> do
-       error msg
-       liftEffect $ exit 1
+      error msg
+      liftEffect $ exit 1
 
   log
     """
