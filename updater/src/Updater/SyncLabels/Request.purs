@@ -155,5 +155,5 @@ mkApiUrl { owner, repo } =
 -- | Construct the authentication header for the GitHub API given a personal
 -- | access token with repo scope.
 mkHeaders :: forall r. { token :: String | r } -> Array RequestHeader
-mkHeaders { token }=
+mkHeaders { token } =
   [ RequestHeader "authorization" (i "token " token) ]

@@ -52,40 +52,45 @@ appendReleaseInfoToChangelog gh = do
     , appendContent
     ]
   where
-    addReleaseInfo :: String -> ReleaseInfo -> String
-    addReleaseInfo acc rec =
-      let
-        dateWithoutTimeZone = takeWhile (_ /= 'T') rec.published_at
-        bodyWithFixedHeaders = fixHeaders $ trim rec.body
-      in acc <> joinWith "\n"
-        [ "## [" <> rec.tag_name <> "](" <> rec.html_url <> ") - " <> dateWithoutTimeZone
-        , ""
-        , bodyWithFixedHeaders
-        , ""
-        , ""
-        ]
+  addReleaseInfo :: String -> ReleaseInfo -> String
+  addReleaseInfo acc rec = do
+    let
+      dateWithoutTimeZone = takeWhile (_ /= 'T') rec.published_at
+      bodyWithFixedHeaders = fixHeaders $ trim rec.body
 
-    fixHeaders :: String -> String
-    fixHeaders s =
-      let
-        replaceAllHeaders =
-          replaceHeaderWithBoldedText 5
-            >>> replaceHeaderWithBoldedText 4
-            >>> replaceHeaderWithBoldedText 3
-            >>> replaceHeaderWithBoldedText 2
-            >>> replaceHeaderWithBoldedText 1
-      in
-        joinWith "\n" $ map replaceAllHeaders (lines s)
+    acc <> joinWith "\n"
+      [ "## [" <> rec.tag_name <> "](" <> rec.html_url <> ") - " <> dateWithoutTimeZone
+      , ""
+      , bodyWithFixedHeaders
+      , ""
+      , ""
+      ]
 
-    replaceHeaderWithBoldedText :: Int -> String -> String
-    replaceHeaderWithBoldedText level line =
-      let
-        prefix = (power "#" level) <> " "
-      in case indexOf (Pattern prefix) line of
-        Nothing -> line
-        Just _ -> "**" <> drop (length prefix) line <> "**"
+  fixHeaders :: String -> String
+  fixHeaders s = do
+    let
+      replaceAllHeaders =
+        replaceHeaderWithBoldedText 5
+          >>> replaceHeaderWithBoldedText 4
+          >>> replaceHeaderWithBoldedText 3
+          >>> replaceHeaderWithBoldedText 2
+          >>> replaceHeaderWithBoldedText 1
 
-recursivelyFetchReleases :: forall r. Array ReleaseInfo -> Int -> { owner :: String, repo :: String | r } -> Aff (Array ReleaseInfo)
+    joinWith "\n" $ map replaceAllHeaders (lines s)
+
+  replaceHeaderWithBoldedText :: Int -> String -> String
+  replaceHeaderWithBoldedText level line = do
+    let prefix = (power "#" level) <> " "
+    case indexOf (Pattern prefix) line of
+      Nothing -> line
+      Just _ -> "**" <> drop (length prefix) line <> "**"
+
+recursivelyFetchReleases
+  :: forall r
+   . Array ReleaseInfo
+  -> Int
+  -> { owner :: String, repo :: String | r }
+  -> Aff (Array ReleaseInfo)
 recursivelyFetchReleases accumulator page gh = do
   pageNResult <- fetchNextPageOfReleases page gh
   case pageNResult of
@@ -97,9 +102,7 @@ fetchNextPageOfReleases page gh = do
   -- For example
   -- https://api.github.com/repos/purescript-contrib/purescript-http-methods/releases
   let url = "https://api.github.com/repos/" <> gh.owner <> "/" <> gh.repo <> "/releases?per_page=100&page=" <> show page
-
-  result <- AX.get RF.json url
-  case result of
+  AX.get RF.json url >>= case _ of
     Left err -> do
       throwError (error $ AX.printError err)
     Right { body, status } | status == StatusCode 200 ->

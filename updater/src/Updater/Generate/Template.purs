@@ -90,8 +90,9 @@ allTemplates =
   , githubIssueConfig
   , githubContributing
   , githubPullRequest
-  , editorconfig
   , githubWorkflowCI
+  , editorconfig
+  , tidyconfig
   , jsEslintrc
   , jsPackageJson
   ]
@@ -109,8 +110,9 @@ runTemplates :: Variables -> Array TemplateSource -> Aff Unit
 runTemplates variables templateSources = do
   backupsDir <- getBackupsDirectory
   templatesDir <- liftEffect $ resolve [ __dirname, ".." ] "templates"
-  let runTemplateOptions = { backupsDir, templatesDir, variables }
-      templates = filterByType { usesJS: variables.usesJS, templates: templateSources }
+  let
+    runTemplateOptions = { backupsDir, templatesDir, variables }
+    templates = filterByType { usesJS: variables.usesJS, templates: templateSources }
   traverse_ (runTemplate runTemplateOptions) templates
   where
   getBackupsDirectory :: Aff FilePath
@@ -135,8 +137,9 @@ type RunTemplateOptions =
 -- | 4. Writing the new contents into the correct directory location
 runTemplate :: RunTemplateOptions -> TemplateSource -> Aff Unit
 runTemplate opts template = do
-  let from = templateSourcePath { usesJS: opts.variables.usesJS } template
-      to = template.destination
+  let
+    from = templateSourcePath { usesJS: opts.variables.usesJS } template
+    to = template.destination
   templatePath <- liftEffect $ resolve [ opts.templatesDir ] from
   templateContents <- FS.readTextFile UTF8 templatePath
 
@@ -154,8 +157,7 @@ runTemplate opts template = do
 -- | Keep JS only templates when using JS.
 filterByType :: { usesJS :: Boolean, templates :: Array TemplateSource } -> Array TemplateSource
 filterByType { usesJS: true, templates } = templates
-filterByType { usesJS: false, templates } =
-  filter (not eq JS <<< _.sourceType) templates
+filterByType { usesJS: false, templates } = filter (not eq JS <<< _.sourceType) templates
 
 -- | Define the source of a given template by its type and destination path.
 -- | Common templates default to base unless using JS.
@@ -177,14 +179,15 @@ validateFiles { usesJS, templates } files = fromFoldable <$> traverse validateFi
     case find (eq path <<< _.destination) templates of
       Nothing -> Left $ "Path '" <> path <> "' is not a valid template"
       Just { sourceType: JS } | not usesJS ->
-        Left $ "Path '" <> path <> "' is a JS only template. Did you forget '--uses-js'?"
+        Left $ "Path '" <> path <> "' is a JS-only template. Did you forget '--uses-js'?"
       Just template -> Right template
 
 -- | Template types:
 -- |
--- | - Base: standard template.
--- | - JS: template project which relies on JS (for example via FFI)
--- | - Common: common for both templates. Defaults to Base, unless using JS.
+-- | - Base: template which is the same in both PS-only and with-JS projects
+-- | - JS: template which is only used in JS projects
+-- | - Common: template used in both PS-only with-JS projects, but differs
+-- |     which differs depending on the project type
 data TemplateSourceType = Base | JS | Common
 
 derive instance eqTemplateSourceType :: Eq TemplateSourceType
@@ -194,6 +197,9 @@ type TemplateSource = { sourceType :: TemplateSourceType, destination :: FilePat
 
 gitignore :: TemplateSource
 gitignore = { sourceType: Common, destination: ".gitignore" }
+
+tidyconfig :: TemplateSource
+tidyconfig = { sourceType: Base, destination: ".tidyrc.json" }
 
 editorconfig :: TemplateSource
 editorconfig = { sourceType: Base, destination: ".editorconfig" }
@@ -208,20 +214,16 @@ docsChangelog :: TemplateSource
 docsChangelog = { sourceType: Base, destination: "CHANGELOG.md" }
 
 githubWorkflowCI :: TemplateSource
-githubWorkflowCI =
-  { sourceType: Common, destination: ".github/workflows/ci.yml" }
+githubWorkflowCI = { sourceType: Common, destination: ".github/workflows/ci.yml" }
 
 githubIssueBugReport :: TemplateSource
-githubIssueBugReport =
-  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/bug-report.md" }
+githubIssueBugReport = { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/bug-report.md" }
 
 githubIssueChangeRequest :: TemplateSource
-githubIssueChangeRequest =
-  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/change-request.md" }
+githubIssueChangeRequest = { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/change-request.md" }
 
 githubIssueConfig :: TemplateSource
-githubIssueConfig =
-  { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/config.yml" }
+githubIssueConfig = { sourceType: Base, destination: ".github/ISSUE_TEMPLATE/config.yml" }
 
 githubContributing :: TemplateSource
 githubContributing = { sourceType: Base, destination: "CONTRIBUTING.md" }

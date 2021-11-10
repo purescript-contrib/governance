@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: '*'
+    branches: "*"
 
 jobs:
   build:
@@ -32,4 +32,8 @@ jobs:
 
       - name: Build source
         run: spago build --no-install
+        working-directory: updater
+
+      - name: Lint source
+        run: purs-tidy check src test
         working-directory: updater
