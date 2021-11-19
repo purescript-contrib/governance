@@ -87,6 +87,7 @@ listAllLabels token = do
     forWithIndex_ labelMap.labels \labelName repos -> do
       log $ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
       log $ show repos
+      log ""
     log "----------------"
     let
       unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
