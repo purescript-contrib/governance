@@ -61,18 +61,19 @@ type Sifted =
 listAllLabels :: String -> ExceptT Error Aff Unit
 listAllLabels token = do
   let
-    allRepos = map { owner: "purescript", repo: _ } purescriptRepos <>
-      map { owner: "purescript-contrib", repo: _ } purescriptContribRepos <>
-      map { owner: "purescript-web", repo: _ } purescriptWebRepos <>
-      map { owner: "purescript-node", repo: _ } purescriptNodeRepos
+    allRepos = map { owner: "purescript", repo: _ } purescriptRepos
+      <> map { owner: "purescript-contrib", repo: _ } purescriptContribRepos
+      <> map { owner: "purescript-web", repo: _ } purescriptWebRepos
+      <>
+        map { owner: "purescript-node", repo: _ } purescriptNodeRepos
 
-    getRepoLabel = listLabel <<< (\{owner, repo} -> { token, owner, repo })
+    getRepoLabel = listLabel <<< (\{ owner, repo } -> { token, owner, repo })
 
   results <- parTraverse getRepoLabel allRepos
 
   let
     handleInsert repo accMap label =
-      { labels: Map.insertWith (<>) label.name [repo] accMap.labels
+      { labels: Map.insertWith (<>) label.name [ repo ] accMap.labels
       , metadata: Map.insertWith Set.union label.name (Set.singleton { description: label.description, color: label.color }) accMap.metadata
       }
 
@@ -82,7 +83,7 @@ listAllLabels token = do
     labelMap = foldl f { labels: Map.empty, metadata: Map.empty } results
   liftEffect do
     log $ i "# of Unique Labels: " (show $ Map.size labelMap.labels)
-    log $ i "Label names: " (show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _) )
+    log $ i "Label names: " (show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _))
     log "----------------"
     forWithIndex_ labelMap.labels \labelName repos -> do
       log $ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
