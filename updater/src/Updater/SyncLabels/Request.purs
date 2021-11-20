@@ -26,8 +26,9 @@ import Data.Codec as Codec
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Migration as CAM
 import Data.Either (Either(..))
-import Data.Foldable (foldl, for_)
-import Data.FoldableWithIndex (forWithIndex_)
+import Data.Foldable (foldl, for_, traverse_)
+import Data.FoldableWithIndex (foldlWithIndex, forWithIndex_)
+import Data.FunctorWithIndex (mapWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
 import Data.Map as Map
@@ -91,13 +92,17 @@ listAllLabels token = do
       haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
       noDifferencesSortedShown = show $ sort $ map fst noDifferences
       haveDiffNumber = Array.length haveDiff
+      labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
+        where
+        foldFn labelName acc repos = acc <>
+          [ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
+          , show repos
+          , ""
+          ]
     log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " allLabels
     log "----------------"
-    forWithIndex_ labelMap.labels \labelName repos -> do
-      log $ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
-      log $ show repos
-      log ""
+    traverse_ log labelAppearancesInRepos
     log "----------------"
     log $ i "Labels with no differences in metadata:"
     log noDifferencesSortedShown
