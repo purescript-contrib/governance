@@ -80,15 +80,15 @@ listAllLabels token = do
       where
       emptyMaps = { labels: Map.empty, metadata: Map.empty }
 
-      insertRepoForEachLabel accMap { repo, labels } =
-        foldl (handleInsert repo) accMap labels
+      insertRepoForEachLabel accMap { owner, repo, labels } =
+        foldl (handleInsert owner repo) accMap labels
 
-      handleInsert repo accMap label = { labels, metadata }
+      handleInsert owner repo accMap label@{ description, color } = { labels, metadata }
         where
         labels = Map.insertWith (<>) label.name [ repo ] accMap.labels
         metadata = Map.insertWith (Map.unionWith (<>)) label.name labelMetadata accMap.metadata
           where
-          labelMetadata = Map.singleton { description: label.description, color: label.color } [ repo ]
+          labelMetadata = Map.singleton { description, color } [ i owner "/" repo ]
 
   liftEffect do
     let
