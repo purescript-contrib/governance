@@ -31,8 +31,10 @@ import Data.FoldableWithIndex (foldlWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
 import Data.Map as Map
+import Data.Map (Map)
 import Data.Maybe (Maybe(..), isNothing)
 import Data.Set as Set
+import Data.Set (Set)
 import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Error, error)
@@ -72,15 +74,23 @@ listAllLabels token = do
   results <- parTraverse getRepoLabel allRepos
 
   let
-    handleInsert repo accMap label =
-      { labels: Map.insertWith (<>) label.name [ repo ] accMap.labels
-      , metadata: Map.insertWith Set.union label.name (Set.singleton { description: label.description, color: label.color }) accMap.metadata
-      }
+    labelMap
+      :: { labels :: Map String (Array String)
+         , metadata :: Map String (Set { description :: String, color :: String })
+         }
+    labelMap = foldl insertRepoForEachLabel emptyMaps results
+      where
+      emptyMaps = { labels: Map.empty, metadata: Map.empty }
 
-    f accMap { repo, labels } =
-      foldl (handleInsert repo) accMap labels
+      insertRepoForEachLabel accMap { repo, labels } =
+        foldl (handleInsert repo) accMap labels
 
-    labelMap = foldl f { labels: Map.empty, metadata: Map.empty } results
+      handleInsert repo accMap label = { labels, metadata }
+        where
+        labels = Map.insertWith (<>) label.name [ repo ] accMap.labels
+        metadata = Map.insertWith Set.union label.name labelMetadata accMap.metadata
+          where
+          labelMetadata = Set.singleton { description: label.description, color: label.color }
 
   liftEffect do
     let
