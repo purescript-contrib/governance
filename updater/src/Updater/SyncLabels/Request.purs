@@ -72,10 +72,10 @@ listAllLabels token = do
   results <- parTraverse getRepoLabel allRepos
 
   let
-    labelMap
-      :: { labels :: Map String (Array String)
-         , metadata :: Map String (Map { description :: String, color :: String } (Array String))
-         }
+    labelMap ::
+      { labels :: Map String (Array String)
+      , metadata :: Map String (Map { description :: String, color :: String } (Array String))
+      }
     labelMap = foldl insertRepoForEachLabel emptyMaps results
       where
       emptyMaps = { labels: Map.empty, metadata: Map.empty }
@@ -102,10 +102,11 @@ listAllLabels token = do
       haveDiffNumber = Array.length haveDiff
       metadataDiff = foldl foldFn [] haveDiff
         where
-        foldFn acc (Tuple labelName metadata) = acc <>
-          [ i labelName " has " (Map.size metadata) " differences" ] <>
-          (foldl foldFn2 [] $ sort $ Map.toUnfoldable metadata) <>
-          [ "" ]
+        foldFn acc (Tuple labelName metadata) =
+          acc
+            <> [ i labelName " has " (Map.size metadata) " differences" ]
+            <> (foldl foldFn2 [] $ sort $ Map.toUnfoldable metadata)
+            <> [ "" ]
 
         foldFn2 acc (Tuple r repos) = acc <>
           [ i "Color: " r.color " | Description: " r.description
@@ -123,16 +124,17 @@ listAllLabels token = do
       finalReport =
         [ i "# of Unique Labels: " uniqueLabelsSize
         , i "Label names: " allLabels
-        "----------------"
-        ] <>
-        labelAppearancesInRepos <>
-        [ "----------------"
-        , "Labels with no differences in metadata:"
-        , noDifferencesSortedShown
         , "----------------"
-        , i haveDiffNumber " labels have differences in metadata:"
-        ] <>
-        metadataDiff
+        ]
+          <> labelAppearancesInRepos
+          <>
+            [ "----------------"
+            , "Labels with no differences in metadata:"
+            , noDifferencesSortedShown
+            , "----------------"
+            , i haveDiffNumber " labels have differences in metadata:"
+            ]
+          <> metadataDiff
 
     traverse_ log finalReport
 
