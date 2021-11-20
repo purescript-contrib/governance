@@ -109,8 +109,8 @@ listAllLabels token = do
             <> [ "" ]
 
         foldFn2 acc (Tuple r repos) = acc <>
-          [ i "Color: " r.color " | Description: " r.description
-          , i " ↳ Repos: " $ show repos
+          [ i "Color: #" r.color " | Description: " r.description
+          , i " ↳ Repos (" (Array.length repos) "): " $ show repos
           ]
 
       labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
