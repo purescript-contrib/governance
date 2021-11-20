@@ -110,16 +110,21 @@ listAllLabels token = do
           , ""
           ]
 
-    log $ i "# of Unique Labels: " uniqueLabelsSize
-    log $ i "Label names: " allLabels
-    log "----------------"
-    traverse_ log labelAppearancesInRepos
-    log "----------------"
-    log $ i "Labels with no differences in metadata:"
-    log noDifferencesSortedShown
-    log "----------------"
-    log $ i haveDiffNumber " labels have differences in metadata:"
-    traverse_ log metadataDiff
+      finalReport =
+        [ i "# of Unique Labels: " uniqueLabelsSize
+        , i "Label names: " allLabels
+        "----------------"
+        ] <>
+        labelAppearancesInRepos <>
+        [ "----------------"
+        , "Labels with no differences in metadata:"
+        , noDifferencesSortedShown
+        , "----------------"
+        , i haveDiffNumber " labels have differences in metadata:"
+        ] <>
+        metadataDiff
+
+    traverse_ log finalReport
 
   where
   listLabel opts@{ owner, repo } = do
