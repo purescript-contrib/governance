@@ -83,9 +83,10 @@ listAllLabels token = do
     labelMap = foldl f { labels: Map.empty, metadata: Map.empty } results
 
     uniqueLabels = show $ Map.size labelMap.labels
+    allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
   liftEffect do
     log $ i "# of Unique Labels: " uniqueLabels
-    log $ i "Label names: " (show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _))
+    log $ i "Label names: " allLabels
     log "----------------"
     forWithIndex_ labelMap.labels \labelName repos -> do
       log $ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
