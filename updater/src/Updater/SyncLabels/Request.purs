@@ -63,11 +63,11 @@ type Sifted =
 listAllLabels :: String -> ExceptT Error Aff Unit
 listAllLabels token = do
   let
-    allRepos = map { owner: "purescript", repo: _ } purescriptRepos
-      <> map { owner: "purescript-contrib", repo: _ } purescriptContribRepos
-      <> map { owner: "purescript-web", repo: _ } purescriptWebRepos
-      <>
-        map { owner: "purescript-node", repo: _ } purescriptNodeRepos
+    allRepos =
+      map { owner: "purescript", repo: _ } purescriptRepos
+        <> map { owner: "purescript-contrib", repo: _ } purescriptContribRepos
+        <> map { owner: "purescript-web", repo: _ } purescriptWebRepos
+        <> map { owner: "purescript-node", repo: _ } purescriptNodeRepos
 
     getRepoLabel = listLabel <<< (\{ owner, repo } -> { token, owner, repo })
 
