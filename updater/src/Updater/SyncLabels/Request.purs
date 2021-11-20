@@ -26,7 +26,7 @@ import Data.Codec as Codec
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Migration as CAM
 import Data.Either (Either(..))
-import Data.Foldable (foldl, for_, traverse_)
+import Data.Foldable (foldl, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
