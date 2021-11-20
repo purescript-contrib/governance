@@ -88,6 +88,7 @@ listAllLabels token = do
     noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
     haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
     noDifferencesSortedShown = show $ sort $ map fst noDifferences
+    haveDiffNumber = Array.length haveDiff
   liftEffect do
     log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " allLabels
@@ -100,7 +101,7 @@ listAllLabels token = do
     log $ i "Labels with no differences in metadata:"
     log noDifferencesSortedShown
     log "----------------"
-    log $ i (Array.length haveDiff) " labels have differences in metadata:"
+    log $ i haveDiffNumber " labels have differences in metadata:"
     for_ haveDiff \(Tuple labelName metadata) -> do
       log $ i labelName " has " (Set.size metadata) " differences"
       for_ (sort $ Set.toUnfoldable metadata) \r -> do
