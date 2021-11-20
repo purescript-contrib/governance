@@ -82,14 +82,15 @@ listAllLabels token = do
 
     labelMap = foldl f { labels: Map.empty, metadata: Map.empty } results
 
-    uniqueLabels = show $ Map.size labelMap.labels
-    allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
-    unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
-    noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
-    haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
-    noDifferencesSortedShown = show $ sort $ map fst noDifferences
-    haveDiffNumber = Array.length haveDiff
   liftEffect do
+    let
+      uniqueLabels = show $ Map.size labelMap.labels
+      allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
+      unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
+      noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
+      haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
+      noDifferencesSortedShown = show $ sort $ map fst noDifferences
+      haveDiffNumber = Array.length haveDiff
     log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " allLabels
     log "----------------"
