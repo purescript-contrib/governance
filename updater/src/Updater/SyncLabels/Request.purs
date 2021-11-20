@@ -81,8 +81,10 @@ listAllLabels token = do
       foldl (handleInsert repo) accMap labels
 
     labelMap = foldl f { labels: Map.empty, metadata: Map.empty } results
+
+    uniqueLabels = show $ Map.size labelMap.labels
   liftEffect do
-    log $ i "# of Unique Labels: " (show $ Map.size labelMap.labels)
+    log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " (show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _))
     log "----------------"
     forWithIndex_ labelMap.labels \labelName repos -> do
