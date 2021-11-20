@@ -1,5 +1,6 @@
 module Updater.SyncLabels.Request
   ( IssueLabelRequestOpts(..)
+  , listAllLabels
   , Sifted(..)
   , getLabels
   , createLabel
@@ -16,6 +17,8 @@ import Affjax.RequestHeader (RequestHeader(..))
 import Affjax.ResponseFormat as AXRF
 import Affjax.StatusCode (StatusCode(..))
 import Control.Monad.Except (ExceptT(..), throwError)
+import Control.Parallel (parTraverse)
+import Data.Array (filter, sort)
 import Data.Array as Array
 import Data.Bifunctor (lmap)
 import Data.Codec (encode, (<~<))
@@ -23,16 +26,23 @@ import Data.Codec as Codec
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Migration as CAM
 import Data.Either (Either(..))
-import Data.Foldable (foldl)
+import Data.Foldable (foldl, traverse_)
+import Data.FoldableWithIndex (foldlWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), isNothing)
 import Data.Symbol (SProxy(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Error, error)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import Record as Record
 import Updater.SyncLabels.IssueLabel (IssueLabel, issueLabelCodec)
 import Updater.SyncLabels.IssueLabel as IssueLabel
 import Updater.SyncLabels.IssueLabel as Issuelabel
+import Updater.SyncLabels.Repos (purescriptContribRepos, purescriptNodeRepos, purescriptRepos, purescriptWebRepos)
 
 -- | The arguments necessary to construct a request to the GitHub API for issue
 -- | labels.
@@ -47,6 +57,102 @@ type Sifted =
   , update :: Array IssueLabel
   , delete :: Array IssueLabel
   }
+
+listAllLabels :: String -> ExceptT Error Aff Unit
+listAllLabels token = do
+  let
+    allRepos =
+      map { owner: "purescript", repo: _ } purescriptRepos
+        <> map { owner: "purescript-contrib", repo: _ } purescriptContribRepos
+        <> map { owner: "purescript-web", repo: _ } purescriptWebRepos
+        <> map { owner: "purescript-node", repo: _ } purescriptNodeRepos
+
+    getRepoLabel = listLabel <<< (\{ owner, repo } -> { token, owner, repo })
+
+  results <- parTraverse getRepoLabel allRepos
+
+  let
+    labelMap ::
+      { labels :: Map String (Array String)
+      , metadata :: Map String (Map { description :: String, color :: String } (Array String))
+      }
+    labelMap = foldl insertRepoForEachLabel emptyMaps results
+      where
+      emptyMaps = { labels: Map.empty, metadata: Map.empty }
+
+      insertRepoForEachLabel accMap { owner, repo, labels } =
+        foldl (handleInsert owner repo) accMap labels
+
+      handleInsert owner repo accMap label@{ description, color } = { labels, metadata }
+        where
+        labels = Map.insertWith (<>) label.name [ repo ] accMap.labels
+        metadata = Map.insertWith (Map.unionWith (<>)) label.name labelMetadata accMap.metadata
+          where
+          labelMetadata = Map.singleton { description, color } [ i owner "/" repo ]
+
+  liftEffect do
+    let
+      uniqueLabelsSize = show $ Map.size labelMap.labels
+      allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
+
+      unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
+      noDifferences = filter (eq 1 <<< Map.size <<< snd) unfoldedMap
+      noDifferencesSortedShown = show $ sort $ map fst noDifferences
+      haveDiff = filter (not <<< eq 1 <<< Map.size <<< snd) unfoldedMap
+      haveDiffNumber = Array.length haveDiff
+      metadataDiff = foldl foldFn [] haveDiff
+        where
+        foldFn acc (Tuple labelName metadata) =
+          acc
+            <> [ i labelName " has " (Map.size metadata) " differences" ]
+            <> (foldl foldFn2 [] $ sort $ Map.toUnfoldable metadata)
+            <> [ "" ]
+
+        foldFn2 acc (Tuple r repos) = acc <>
+          [ i "Color: " r.color " | Description: " r.description
+          , i " ↳ Repos: " $ show repos
+          ]
+
+      labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
+        where
+        foldFn labelName acc repos = acc <>
+          [ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
+          , show repos
+          , ""
+          ]
+
+      finalReport =
+        [ i "# of Unique Labels: " uniqueLabelsSize
+        , i "Label names: " allLabels
+        , "----------------"
+        ]
+          <> labelAppearancesInRepos
+          <>
+            [ "----------------"
+            , "Labels with no differences in metadata:"
+            , noDifferencesSortedShown
+            , "----------------"
+            , i haveDiffNumber " labels have differences in metadata:"
+            ]
+          <> metadataDiff
+
+    traverse_ log finalReport
+
+  where
+  listLabel opts@{ owner, repo } = do
+    resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
+      { headers = mkHeaders opts
+      , responseFormat = AXRF.json
+      , url = mkApiUrl opts
+      }
+
+    unless (resp.status == StatusCode 200) do
+      throwError $ error $ i "Did not receive StatusCode 200 when getting labels for: " opts.owner "/" opts.repo
+
+    let decoded = Codec.decode (CA.array issueLabelCodec) resp.body
+
+    labels <- ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
+    pure { owner, repo, labels }
 
 -- | Fetch all labels for the repository.
 getLabels :: IssueLabelRequestOpts -> ExceptT Error Aff Sifted

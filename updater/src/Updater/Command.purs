@@ -2,6 +2,7 @@ module Updater.Command
   ( Command(..)
   , GenerateOptions(..)
   , SyncLabelsOptions(..)
+  , ListLabelsOptions(..)
   , run
   ) where
 
@@ -37,6 +38,7 @@ import Updater.Utils.Dhall as Utils.Dhall
 data Command
   = Generate GenerateOptions
   | SyncLabels SyncLabelsOptions
+  | ListLabels ListLabelsOptions
 
 -- | Run a command, performing any relevant updates.
 run :: Command -> Effect Unit
@@ -46,6 +48,9 @@ run = launchAff_ <<< case _ of
 
   SyncLabels opts ->
     runSyncLabels opts
+
+  ListLabels opts ->
+    runListLabels opts
 
 -- | Possible flags to control how library templates should be generated. These
 -- | are largely the same as the set of supported variables (see the documentation
@@ -161,3 +166,11 @@ runSyncLabels opts = do
 
     Right _ ->
       log "Successfully completed syncing labels."
+
+type ListLabelsOptions =
+  { token :: String
+  }
+
+runListLabels :: ListLabelsOptions -> Aff Unit
+runListLabels opts = do
+  void $ runExceptT $ SyncLabels.listAllLabels opts.token

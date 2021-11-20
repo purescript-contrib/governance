@@ -26,6 +26,7 @@
   , "node-process"
   , "nullable"
   , "optparse"
+  , "ordered-collections"
   , "parallel"
   , "prelude"
   , "psci-support"
@@ -35,6 +36,7 @@
   , "stringutils"
   , "sunde"
   , "transformers"
+  , "tuples"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
