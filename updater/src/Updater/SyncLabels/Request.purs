@@ -27,8 +27,7 @@ import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Migration as CAM
 import Data.Either (Either(..))
 import Data.Foldable (foldl, for_, traverse_)
-import Data.FoldableWithIndex (foldlWithIndex, forWithIndex_)
-import Data.FunctorWithIndex (mapWithIndex)
+import Data.FoldableWithIndex (foldlWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
 import Data.Map as Map
@@ -99,6 +98,16 @@ listAllLabels token = do
           , show repos
           , ""
           ]
+      metadataDiff = foldl foldFn [] haveDiff
+        where
+        foldFn acc (Tuple labelName metadata) = acc <>
+          [ i labelName " has " (Set.size metadata) " differences" ] <>
+          (foldl foldFn2 [] $ sort $ Set.toUnfoldable metadata) <>
+          [ "" ]
+
+        foldFn2 acc r = acc <>
+          [ i "Color: " r.color " | Description: " r.description ]
+
     log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " allLabels
     log "----------------"
@@ -108,11 +117,7 @@ listAllLabels token = do
     log noDifferencesSortedShown
     log "----------------"
     log $ i haveDiffNumber " labels have differences in metadata:"
-    for_ haveDiff \(Tuple labelName metadata) -> do
-      log $ i labelName " has " (Set.size metadata) " differences"
-      for_ (sort $ Set.toUnfoldable metadata) \r -> do
-        log $ i "Color: " r.color " | Description: " r.description
-      log ""
+    traverse_ log metadataDiff
 
   where
   listLabel opts@{ owner, repo } = do
