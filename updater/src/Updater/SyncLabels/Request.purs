@@ -84,20 +84,14 @@ listAllLabels token = do
 
   liftEffect do
     let
-      uniqueLabels = show $ Map.size labelMap.labels
+      uniqueLabelsSize = show $ Map.size labelMap.labels
       allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
+
       unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
       noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
       haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
       noDifferencesSortedShown = show $ sort $ map fst noDifferences
       haveDiffNumber = Array.length haveDiff
-      labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
-        where
-        foldFn labelName acc repos = acc <>
-          [ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
-          , show repos
-          , ""
-          ]
       metadataDiff = foldl foldFn [] haveDiff
         where
         foldFn acc (Tuple labelName metadata) = acc <>
@@ -108,7 +102,15 @@ listAllLabels token = do
         foldFn2 acc r = acc <>
           [ i "Color: " r.color " | Description: " r.description ]
 
-    log $ i "# of Unique Labels: " uniqueLabels
+      labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
+        where
+        foldFn labelName acc repos = acc <>
+          [ i "Label '" labelName "' appears in " (Array.length repos) " repos:"
+          , show repos
+          , ""
+          ]
+
+    log $ i "# of Unique Labels: " uniqueLabelsSize
     log $ i "Label names: " allLabels
     log "----------------"
     traverse_ log labelAppearancesInRepos
