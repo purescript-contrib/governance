@@ -84,6 +84,9 @@ listAllLabels token = do
 
     uniqueLabels = show $ Map.size labelMap.labels
     allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
+    unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
+    noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
+    haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
   liftEffect do
     log $ i "# of Unique Labels: " uniqueLabels
     log $ i "Label names: " allLabels
@@ -93,10 +96,6 @@ listAllLabels token = do
       log $ show repos
       log ""
     log "----------------"
-    let
-      unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
-      noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
-      haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
     log $ i "Labels with no differences in metadata:"
     log $ show $ sort $ map fst noDifferences
     log "----------------"
