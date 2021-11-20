@@ -30,11 +30,9 @@ import Data.Foldable (foldl, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.HTTP.Method (Method(..))
 import Data.Interpolate (i)
-import Data.Map as Map
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), isNothing)
-import Data.Set as Set
-import Data.Set (Set)
 import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Error, error)
@@ -76,7 +74,7 @@ listAllLabels token = do
   let
     labelMap
       :: { labels :: Map String (Array String)
-         , metadata :: Map String (Set { description :: String, color :: String })
+         , metadata :: Map String (Map { description :: String, color :: String } (Array String))
          }
     labelMap = foldl insertRepoForEachLabel emptyMaps results
       where
@@ -88,9 +86,9 @@ listAllLabels token = do
       handleInsert repo accMap label = { labels, metadata }
         where
         labels = Map.insertWith (<>) label.name [ repo ] accMap.labels
-        metadata = Map.insertWith Set.union label.name labelMetadata accMap.metadata
+        metadata = Map.insertWith (Map.unionWith (<>)) label.name labelMetadata accMap.metadata
           where
-          labelMetadata = Set.singleton { description: label.description, color: label.color }
+          labelMetadata = Map.singleton { description: label.description, color: label.color } [ repo ]
 
   liftEffect do
     let
@@ -98,19 +96,21 @@ listAllLabels token = do
       allLabels = show $ sort $ map fst $ (Map.toUnfoldableUnordered labelMap.labels :: Array _)
 
       unfoldedMap = Map.toUnfoldableUnordered labelMap.metadata
-      noDifferences = filter (eq 1 <<< Set.size <<< snd) unfoldedMap
-      haveDiff = filter (not <<< eq 1 <<< Set.size <<< snd) unfoldedMap
+      noDifferences = filter (eq 1 <<< Map.size <<< snd) unfoldedMap
       noDifferencesSortedShown = show $ sort $ map fst noDifferences
+      haveDiff = filter (not <<< eq 1 <<< Map.size <<< snd) unfoldedMap
       haveDiffNumber = Array.length haveDiff
       metadataDiff = foldl foldFn [] haveDiff
         where
         foldFn acc (Tuple labelName metadata) = acc <>
-          [ i labelName " has " (Set.size metadata) " differences" ] <>
-          (foldl foldFn2 [] $ sort $ Set.toUnfoldable metadata) <>
+          [ i labelName " has " (Map.size metadata) " differences" ] <>
+          (foldl foldFn2 [] $ sort $ Map.toUnfoldable metadata) <>
           [ "" ]
 
-        foldFn2 acc r = acc <>
-          [ i "Color: " r.color " | Description: " r.description ]
+        foldFn2 acc (Tuple r repos) = acc <>
+          [ i "Color: " r.color " | Description: " r.description
+          , i " ↳ Repos: " $ show repos
+          ]
 
       labelAppearancesInRepos = foldlWithIndex foldFn [] labelMap.labels
         where
