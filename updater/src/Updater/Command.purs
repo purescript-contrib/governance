@@ -141,7 +141,7 @@ runSyncLabels opts = do
       }
 
   resp <- runExceptT do
-    sifted <- SyncLabels.getLabels requestOpts
+    sifted <- SyncLabels.getSiftedLabels requestOpts
 
     let logPreview msg = log <<< append msg <<< joinWith ", " <<< map (show <<< _.name)
 

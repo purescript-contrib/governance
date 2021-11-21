@@ -3,6 +3,7 @@ module Updater.SyncLabels.Request
   , listAllLabels
   , Sifted(..)
   , getLabels
+  , getSiftedLabels
   , createLabel
   , patchLabel
   , deleteLabel
@@ -155,7 +156,7 @@ listAllLabels token = do
     pure { owner, repo, labels }
 
 -- | Fetch all labels for the repository.
-getLabels :: IssueLabelRequestOpts -> ExceptT Error Aff Sifted
+getLabels :: IssueLabelRequestOpts -> ExceptT Error Aff (Array IssueLabel)
 getLabels opts = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { headers = mkHeaders opts
@@ -168,8 +169,12 @@ getLabels opts = do
 
   let decoded = Codec.decode (CA.array issueLabelCodec) resp.body
 
-  labels <- ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
-  pure $ sift labels
+  ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
+
+-- | Fetch all labels for the repository.
+getSiftedLabels :: IssueLabelRequestOpts -> ExceptT Error Aff Sifted
+getSiftedLabels opts = do
+  sift <$> getLabels opts
 
 -- | Reconcile the labels received from the API with the actions that should be
 -- | taken for each label (create missing labels, patch existing labels, or
