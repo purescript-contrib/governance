@@ -73,6 +73,7 @@ labels =
   , abandonedLabel
   , blockedLabel
   , needsMoreInfoLabel
+  , acceptedLabel
   , needsReviewLabel
   , needsApprovalLabel
   , goodFirstIssueLabel
@@ -143,10 +144,17 @@ needsMoreInfoLabel = dropColorHashSym
   , description: "This issue needs more info before any action can be done."
   }
 
+acceptedLabel :: IssueLabel
+acceptedLabel = dropColorHashSym
+  { name: "status: accepted"
+  , color: "#005000"
+  , description: "This issue is now ready to be implemented via a PR."
+  }
+
 needsReviewLabel :: IssueLabel
 needsReviewLabel = dropColorHashSym
   { name: "status: needs review"
-  , color: "#006000"
+  , color: "#008000"
   , description: "This PR needs a review."
   }
 
