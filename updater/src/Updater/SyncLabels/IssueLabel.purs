@@ -126,7 +126,7 @@ abandonedLabel :: IssueLabel
 abandonedLabel = dropColorHashSym
   { name: "status: abandoned"
   , color: "#000000"
-  , description: "This PR is no longer being worked on. Another can use it as a base for continuing the work"
+  , description: "This PR is no longer being worked on. Another can use it as a base for continuing the work."
   }
 
 blockedLabel :: IssueLabel
@@ -154,7 +154,7 @@ needsApprovalLabel :: IssueLabel
 needsApprovalLabel = dropColorHashSym
   { name: "status: needs approval"
   , color: "#00b000"
-  , description: "This PR needs approval before it can be merged"
+  , description: "This PR needs approval before it can be merged."
   }
 
 goodFirstIssueLabel :: IssueLabel
@@ -168,7 +168,7 @@ duplicateLabel :: IssueLabel
 duplicateLabel = dropColorHashSym
   { name: "duplicate"
   , color: "#cccccc"
-  , description: "This issue or pull request already exists"
+  , description: "This issue or pull request already exists."
   }
 
 wontfixLabel :: IssueLabel
@@ -182,7 +182,7 @@ houseKeepingLabel :: IssueLabel
 houseKeepingLabel = dropColorHashSym
   { name: "type: housekeeping"
   , color: "#ebea04"
-  , description: "Repo-related things (e.g. fixing CI) that need to be done"
+  , description: "Repo-related things (e.g. fixing CI) that need to be done."
   }
 
 questionLabel :: IssueLabel
