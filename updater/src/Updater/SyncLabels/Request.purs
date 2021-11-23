@@ -4,6 +4,8 @@ module Updater.SyncLabels.Request
   , Sifted(..)
   , getLabels
   , getSiftedLabels
+  , LabelAction(..)
+  , calcLabelActions
   , createLabel
   , patchLabel
   , patchLabel'
@@ -36,6 +38,7 @@ import Data.Interpolate (i)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), isNothing)
+import Data.Set as Set
 import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Error, error)
@@ -211,6 +214,57 @@ sift =
           isNothing (Array.find (eq name <<< _.name) sifted.update)
             && isNothing (Array.find (eq name <<< _.name) sifted.accept)
     }
+
+data LabelAction
+  = Create IssueLabel
+  | Update String IssueLabel
+  | Delete String
+
+allLabelsMap :: Map String IssueLabel
+allLabelsMap = Map.fromFoldable $ map (\r -> Tuple r.name r) IssueLabel.labels
+
+-- | Using a repo's current array of labels, returns
+-- | an array of actions to take to fully sync that repo's labels
+-- | with the expected ones.
+-- |
+-- | Note: a label will be deleted if it is found in `IssueLabel.deleteLabels`
+calcLabelActions :: Array IssueLabel -> Array LabelAction
+calcLabelActions repoLabels = insertCreateActions calcUpdateDeleteAndCreate
+  where
+  -- | First, create an initial array of deletions and updates (i.e. `updateDelete`)
+  -- | while also tracking which labels we no longer need to
+  -- | create because they already exist (i.e. `create`).
+  calcUpdateDeleteAndCreate = Array.foldl deleteUpdateIgnoreOrTrackCreateables init repoLabels
+    where
+    init :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    init = { updateDelete: [], create: allLabelsMap }
+
+    deleteUpdateIgnoreOrTrackCreateables
+      :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+      -> IssueLabel
+      -> { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    deleteUpdateIgnoreOrTrackCreateables acc next
+      | Set.member next.name IssueLabel.deleteLabels =
+          acc { updateDelete = acc.updateDelete `Array.snoc` (Delete next.name) }
+      | Just newLabel <- Map.lookup next.name IssueLabel.renameLabelMapping =
+          acc { updateDelete = acc.updateDelete `Array.snoc` (Update next.name newLabel) }
+      | Just newLabel <- Map.lookup next.name allLabelsMap =
+          { updateDelete: acc.updateDelete `Array.snoc` (Update next.name newLabel)
+          , create: Map.delete next.name acc.create
+          }
+      -- label not found: ignore it
+      | otherwise = acc
+
+  -- | Second, insert the labels we need to create, as they weren't found in
+  -- | the earlier fold.
+  insertCreateActions
+    :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    -> Array LabelAction
+  insertCreateActions { updateDelete, create } =
+    foldl addCreateActions updateDelete create
+    where
+    addCreateActions :: Array LabelAction -> IssueLabel -> Array LabelAction
+    addCreateActions acc label = acc `Array.snoc` (Create label)
 
 -- | Create a new label. Note: if updating a label, use `patchLabel` instead.
 createLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit

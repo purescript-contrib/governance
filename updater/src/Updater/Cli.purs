@@ -34,6 +34,9 @@ command = OA.hsubparser $ fold
   , OA.command "sync-labels"
       $ OA.info syncLabels
       $ OA.progDesc "Sync issue label names, descriptions, and colors with the standard set"
+  , OA.command "sync-all-labels"
+      $ OA.info syncAllLabels
+      $ OA.progDesc "Sync all issue label names, descriptions, and colors across the core, contrib, web, and node repos"
   , OA.command "list-labels"
       $ OA.info listLabels
       $ OA.progDesc "List all labels across all core, contrib, web, and node libraries."
@@ -121,6 +124,15 @@ command = OA.hsubparser $ fold
 
   listLabels :: Parser Command
   listLabels = map ListLabels ado
+    token <- OA.strOption $ fold
+      [ OA.long "token"
+      , OA.metavar "STRING"
+      , OA.help "A personal access token for GitHub with at least public_repo scope"
+      ]
+    in { token }
+
+  syncAllLabels :: Parser Command
+  syncAllLabels = map SyncAllLabels ado
     token <- OA.strOption $ fold
       [ OA.long "token"
       , OA.metavar "STRING"

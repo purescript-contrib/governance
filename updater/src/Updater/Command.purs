@@ -3,6 +3,7 @@ module Updater.Command
   , GenerateOptions(..)
   , SyncLabelsOptions(..)
   , ListLabelsOptions(..)
+  , SyncAllLabelsOptions(..)
   , run
   ) where
 
@@ -28,7 +29,8 @@ import Node.Path (FilePath)
 import Node.Process (exit)
 import Updater.Generate.Changelog (appendReleaseInfoToChangelog)
 import Updater.Generate.Template (allTemplates, docsChangelog, runTemplates, validateFiles)
-import Updater.SyncLabels.Request (IssueLabelRequestOpts)
+import Updater.SyncLabels.Repos (purescriptContribRepos, purescriptNodeRepos, purescriptRepos, purescriptWebRepos)
+import Updater.SyncLabels.Request (IssueLabelRequestOpts, LabelAction(..), calcLabelActions)
 import Updater.SyncLabels.Request as SyncLabels
 import Updater.Utils.Dhall as Utils.Dhall
 
@@ -39,6 +41,7 @@ data Command
   = Generate GenerateOptions
   | SyncLabels SyncLabelsOptions
   | ListLabels ListLabelsOptions
+  | SyncAllLabels SyncAllLabelsOptions
 
 -- | Run a command, performing any relevant updates.
 run :: Command -> Effect Unit
@@ -51,6 +54,9 @@ run = launchAff_ <<< case _ of
 
   ListLabels opts ->
     runListLabels opts
+
+  SyncAllLabels opts ->
+    runSyncAllLabels opts
 
 -- | Possible flags to control how library templates should be generated. These
 -- | are largely the same as the set of supported variables (see the documentation
@@ -166,6 +172,44 @@ runSyncLabels opts = do
 
     Right _ ->
       log "Successfully completed syncing labels."
+
+type SyncAllLabelsOptions =
+  { token :: String }
+
+-- | Update the issue labels used in the repositories across all
+-- | core, contrib, web, and node libraries to use the same
+-- | colors, label, names, and descriptions defined in IssueLabel.
+runSyncAllLabels :: SyncAllLabelsOptions -> Aff Unit
+runSyncAllLabels { token } = do
+  pure unit
+  let
+    withOwner owner = map \repo -> { token, owner, repo }
+    allRepos = join
+      [ withOwner "purescript" purescriptRepos
+      , withOwner "purescript-contrib" purescriptContribRepos
+      , withOwner "purescript-web" purescriptWebRepos
+      , withOwner "purescript-node" purescriptNodeRepos
+      ]
+
+  flip parTraverse_ allRepos \opts@{ owner, repo } -> do
+    resp <- runExceptT do
+      repoLabels <- SyncLabels.getLabels opts
+
+      flip parTraverse_ (calcLabelActions repoLabels) case _ of
+        Create label -> SyncLabels.createLabel opts label
+        Update oldName newLabel -> SyncLabels.patchLabel' opts oldName newLabel
+        Delete labelName -> SyncLabels.deleteLabel' opts labelName
+
+    log $ i "For repo '" owner "/" repo "'..."
+    case resp of
+      Left e -> do
+        log $ i "\tDid not successfully create, update, and delete labels: "
+        error (Aff.message e)
+        log "\tYou can retry this operation."
+        throwError e
+
+      Right _ ->
+        log "\tSuccessfully completed syncing labels."
 
 type ListLabelsOptions =
   { token :: String
