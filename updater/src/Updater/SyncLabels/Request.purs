@@ -6,7 +6,9 @@ module Updater.SyncLabels.Request
   , getSiftedLabels
   , createLabel
   , patchLabel
+  , patchLabel'
   , deleteLabel
+  , deleteLabel'
   ) where
 
 import Prelude
@@ -230,11 +232,14 @@ createLabel opts label = do
 -- |
 -- | See: https://developer.github.com/v3/issues/labels/#update-a-label
 patchLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit
-patchLabel opts label = do
+patchLabel opts label = patchLabel' opts label.name label
+
+patchLabel' :: IssueLabelRequestOpts -> String -> IssueLabel -> ExceptT Error Aff Unit
+patchLabel' opts oldName label = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { method = Left PATCH
     , headers = mkHeaders opts
-    , url = i (mkApiUrl opts) "/" label.name
+    , url = i (mkApiUrl opts) "/" oldName
     , content =
         Just
           $ Json
@@ -247,15 +252,18 @@ patchLabel opts label = do
 
 -- | Delete a particular label.
 deleteLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit
-deleteLabel opts label = do
+deleteLabel opts label = deleteLabel' opts label.name
+
+deleteLabel' :: IssueLabelRequestOpts -> String -> ExceptT Error Aff Unit
+deleteLabel' opts labelName = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { method = Left DELETE
     , headers = mkHeaders opts
-    , url = i (mkApiUrl opts) "/" label.name
+    , url = i (mkApiUrl opts) "/" labelName
     }
 
   unless (resp.status == StatusCode 204) do
-    throwError $ error $ "Did not receive StatusCode 204 when deleting label: " <> label.name
+    throwError $ error $ "Did not receive StatusCode 204 when deleting label: " <> labelName
 
 -- | Construct the GitHub API base endpoint for issue labels given a repository
 -- | owner and nmae.
