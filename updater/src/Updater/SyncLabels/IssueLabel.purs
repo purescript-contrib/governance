@@ -80,8 +80,7 @@ labels =
   , wontfixLabel
   , houseKeepingLabel
   , questionLabel
-  , mergeBefore0_14Label
-  , fixBefore0_14Label
+  , purs0_14Label
   , purs0_15Label
   ]
 
