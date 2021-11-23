@@ -49,7 +49,6 @@ renameLabelMapping =
     , "fix before 0.14" /\ purs0_14Label
     , "good first issue" /\ goodFirstIssueLabel
     , "merge before 0.14" /\ purs0_14Label
-    , "question" /\ questionLabel
     , "wontfix" /\ wontfixLabel
     ]
 
@@ -60,6 +59,7 @@ deleteLabels = Set.fromFoldable
   , "invalid"
   , "reference"
   , "stale"
+  , "question"
   ]
 
 -- | The full set of issue labels supported by Contributor libraries.
@@ -80,7 +80,6 @@ labels =
   , duplicateLabel
   , wontfixLabel
   , houseKeepingLabel
-  , questionLabel
   , purs0_14Label
   , purs0_15Label
   ]
@@ -191,13 +190,6 @@ houseKeepingLabel = dropColorHashSym
   { name: "type: housekeeping"
   , color: "#ebea04"
   , description: "Repo-related things (e.g. fixing CI) that need to be done."
-  }
-
-questionLabel :: IssueLabel
-questionLabel = dropColorHashSym
-  { name: "type: question"
-  , color: "#fbca04"
-  , description: ""
   }
 
 purs0_14Label :: IssueLabel
