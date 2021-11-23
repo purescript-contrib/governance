@@ -82,6 +82,8 @@ labels =
   , questionLabel
   , mergeBefore0_14Label
   , fixBefore0_14Label
+  , mergeBefore0_15Label
+  , fixBefore0_15Label
   ]
 
 dropColorHashSym :: IssueLabel -> IssueLabel
@@ -204,4 +206,18 @@ fixBefore0_14Label = dropColorHashSym
   { name: "fix before 0.14"
   , color: "#404040"
   , description: "A reminder to address this issue before we release PureScript v0.14.0"
+  }
+
+mergeBefore0_15Label :: IssueLabel
+mergeBefore0_15Label = dropColorHashSym
+  { name: "merge before 0.15"
+  , color: "#404040"
+  , description: "A reminder to merge this PR before we release PureScript v0.15.0"
+  }
+
+fixBefore0_15Label :: IssueLabel
+fixBefore0_15Label = dropColorHashSym
+  { name: "fix before 0.15"
+  , color: "#404040"
+  , description: "A reminder to address this issue before we release PureScript v0.15.0"
   }
