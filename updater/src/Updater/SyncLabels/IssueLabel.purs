@@ -196,12 +196,12 @@ mergeBefore0_14Label :: IssueLabel
 mergeBefore0_14Label = dropColorHashSym
   { name: "merge before 0.14"
   , color: "#404040"
-  , description: ""
+  , description: "A reminder to merge this PR before we release PureScript v0.14.0"
   }
 
 fixBefore0_14Label :: IssueLabel
 fixBefore0_14Label = dropColorHashSym
   { name: "fix before 0.14"
   , color: "#404040"
-  , description: ""
+  , description: "A reminder to address this issue before we release PureScript v0.14.0"
   }
