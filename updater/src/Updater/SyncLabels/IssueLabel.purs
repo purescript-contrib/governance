@@ -46,9 +46,9 @@ renameLabelMapping =
     , "document me" /\ documentationLabel
     , "documentation" /\ documentationLabel
     , "enhancement" /\ enhancementLabel
-    , "fix before 0.14" /\ fixBefore0_14Label
+    , "fix before 0.14" /\ purs0_14Label
     , "good first issue" /\ goodFirstIssueLabel
-    , "merge before 0.14" /\ mergeBefore0_14Label
+    , "merge before 0.14" /\ purs0_14Label
     , "question" /\ questionLabel
     , "wontfix" /\ wontfixLabel
     ]
@@ -193,18 +193,11 @@ questionLabel = dropColorHashSym
   , description: ""
   }
 
-mergeBefore0_14Label :: IssueLabel
-mergeBefore0_14Label = dropColorHashSym
-  { name: "merge before 0.14"
+purs0_14Label :: IssueLabel
+purs0_14Label = dropColorHashSym
+  { name: "purs-0.14"
   , color: "#404040"
-  , description: "A reminder to merge this PR before we release PureScript v0.14.0"
-  }
-
-fixBefore0_14Label :: IssueLabel
-fixBefore0_14Label = dropColorHashSym
-  { name: "fix before 0.14"
-  , color: "#404040"
-  , description: "A reminder to address this issue before we release PureScript v0.14.0"
+  , description: "A reminder to address this issue or merge this PR before we release PureScript v0.14.0"
   }
 
 purs0_15Label :: IssueLabel
