@@ -91,35 +91,35 @@ breakingChangeLabel :: IssueLabel
 breakingChangeLabel = dropColorHashSym
   { name: "type: breaking change"
   , color: "#e99695"
-  , description: "A change that requires a major version bump"
+  , description: "A change that requires a major version bump."
   }
 
 bugLabel :: IssueLabel
 bugLabel = dropColorHashSym
   { name: "type: bug"
   , color: "#d73a4a"
-  , description: "Something that should function correctly isn't"
+  , description: "Something that should function correctly isn't."
   }
 
 regressionLabel :: IssueLabel
 regressionLabel = dropColorHashSym
   { name: "type: regression"
   , color: "#e4d0f0"
-  , description: "Something that worked previously no longer works"
+  , description: "Something that worked previously no longer works."
   }
 
 enhancementLabel :: IssueLabel
 enhancementLabel = dropColorHashSym
   { name: "type: enhancement"
   , color: "#a6e1ea"
-  , description: "A new feature or addition"
+  , description: "A new feature or addition."
   }
 
 documentationLabel :: IssueLabel
 documentationLabel = dropColorHashSym
   { name: "type: documentation"
   , color: "#0000ff"
-  , description: "Improvements or additions to documentation"
+  , description: "Improvements or additions to documentation."
   }
 
 abandonedLabel :: IssueLabel
