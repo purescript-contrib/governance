@@ -161,7 +161,7 @@ goodFirstIssueLabel :: IssueLabel
 goodFirstIssueLabel = dropColorHashSym
   { name: "good first issue"
   , color: "#7007ff"
-  , description: ""
+  , description: "First-time contributors who are looking to help should work on these issues."
   }
 
 duplicateLabel :: IssueLabel
@@ -175,7 +175,7 @@ wontfixLabel :: IssueLabel
 wontfixLabel = dropColorHashSym
   { name: "status: wontfix"
   , color: "#ffffff"
-  , description: ""
+  , description: "The maintainers of this library don't think the issue is actually a problem."
   }
 
 houseKeepingLabel :: IssueLabel
