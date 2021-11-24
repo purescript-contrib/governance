@@ -247,7 +247,9 @@ calcLabelActions repoLabels = insertCreateActions calcUpdateDeleteAndCreate
       | Set.member next.name IssueLabel.deleteLabels =
           acc { updateDelete = acc.updateDelete `Array.snoc` (Delete next.name) }
       | Just newLabel <- Map.lookup next.name IssueLabel.renameLabelMapping =
-          acc { updateDelete = acc.updateDelete `Array.snoc` (Update next.name newLabel) }
+          { updateDelete: acc.updateDelete `Array.snoc` (Update next.name newLabel)
+          , create: Map.delete newLabel.name acc.create
+          }
       | Just newLabel <- Map.lookup next.name allLabelsMap =
           { updateDelete: acc.updateDelete `Array.snoc` (Update next.name newLabel)
           , create: Map.delete next.name acc.create
