@@ -3,9 +3,14 @@ module Updater.SyncLabels.Request
   , listAllLabels
   , Sifted(..)
   , getLabels
+  , getSiftedLabels
+  , LabelAction(..)
+  , calcLabelActions
   , createLabel
   , patchLabel
+  , patchLabel'
   , deleteLabel
+  , deleteLabel'
   ) where
 
 import Prelude
@@ -33,6 +38,7 @@ import Data.Interpolate (i)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), isNothing)
+import Data.Set as Set
 import Data.Symbol (SProxy(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Error, error)
@@ -155,7 +161,7 @@ listAllLabels token = do
     pure { owner, repo, labels }
 
 -- | Fetch all labels for the repository.
-getLabels :: IssueLabelRequestOpts -> ExceptT Error Aff Sifted
+getLabels :: IssueLabelRequestOpts -> ExceptT Error Aff (Array IssueLabel)
 getLabels opts = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { headers = mkHeaders opts
@@ -168,8 +174,12 @@ getLabels opts = do
 
   let decoded = Codec.decode (CA.array issueLabelCodec) resp.body
 
-  labels <- ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
-  pure $ sift labels
+  ExceptT $ pure $ lmap (error <<< CA.printJsonDecodeError) decoded
+
+-- | Fetch all labels for the repository.
+getSiftedLabels :: IssueLabelRequestOpts -> ExceptT Error Aff Sifted
+getSiftedLabels opts = do
+  sift <$> getLabels opts
 
 -- | Reconcile the labels received from the API with the actions that should be
 -- | taken for each label (create missing labels, patch existing labels, or
@@ -205,6 +215,59 @@ sift =
             && isNothing (Array.find (eq name <<< _.name) sifted.accept)
     }
 
+data LabelAction
+  = Create IssueLabel
+  | Update String IssueLabel
+  | Delete String
+
+allLabelsMap :: Map String IssueLabel
+allLabelsMap = Map.fromFoldable $ map (\r -> Tuple r.name r) IssueLabel.labels
+
+-- | Using a repo's current array of labels, returns
+-- | an array of actions to take to fully sync that repo's labels
+-- | with the expected ones.
+-- |
+-- | Note: a label will be deleted if it is found in `IssueLabel.deleteLabels`
+calcLabelActions :: Array IssueLabel -> Array LabelAction
+calcLabelActions repoLabels = insertCreateActions calcUpdateDeleteAndCreate
+  where
+  -- | First, create an initial array of deletions and updates (i.e. `updateDelete`)
+  -- | while also tracking which labels we no longer need to
+  -- | create because they already exist (i.e. `create`).
+  calcUpdateDeleteAndCreate = Array.foldl deleteUpdateIgnoreOrTrackCreateables init repoLabels
+    where
+    init :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    init = { updateDelete: [], create: allLabelsMap }
+
+    deleteUpdateIgnoreOrTrackCreateables
+      :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+      -> IssueLabel
+      -> { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    deleteUpdateIgnoreOrTrackCreateables acc next
+      | Set.member next.name IssueLabel.deleteLabels =
+          acc { updateDelete = acc.updateDelete `Array.snoc` (Delete next.name) }
+      | Just newLabel <- Map.lookup next.name IssueLabel.renameLabelMapping =
+          { updateDelete: acc.updateDelete `Array.snoc` (Update next.name newLabel)
+          , create: Map.delete newLabel.name acc.create
+          }
+      | Just newLabel <- Map.lookup next.name allLabelsMap =
+          { updateDelete: acc.updateDelete `Array.snoc` (Update next.name newLabel)
+          , create: Map.delete next.name acc.create
+          }
+      -- label not found: ignore it
+      | otherwise = acc
+
+  -- | Second, insert the labels we need to create, as they weren't found in
+  -- | the earlier fold.
+  insertCreateActions
+    :: { updateDelete :: Array LabelAction, create :: Map String IssueLabel }
+    -> Array LabelAction
+  insertCreateActions { updateDelete, create } =
+    foldl addCreateActions updateDelete create
+    where
+    addCreateActions :: Array LabelAction -> IssueLabel -> Array LabelAction
+    addCreateActions acc label = acc `Array.snoc` (Create label)
+
 -- | Create a new label. Note: if updating a label, use `patchLabel` instead.
 createLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit
 createLabel opts label = do
@@ -225,11 +288,14 @@ createLabel opts label = do
 -- |
 -- | See: https://developer.github.com/v3/issues/labels/#update-a-label
 patchLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit
-patchLabel opts label = do
+patchLabel opts label = patchLabel' opts label.name label
+
+patchLabel' :: IssueLabelRequestOpts -> String -> IssueLabel -> ExceptT Error Aff Unit
+patchLabel' opts oldName label = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { method = Left PATCH
     , headers = mkHeaders opts
-    , url = i (mkApiUrl opts) "/" label.name
+    , url = i (mkApiUrl opts) "/" oldName
     , content =
         Just
           $ Json
@@ -242,15 +308,18 @@ patchLabel opts label = do
 
 -- | Delete a particular label.
 deleteLabel :: IssueLabelRequestOpts -> IssueLabel -> ExceptT Error Aff Unit
-deleteLabel opts label = do
+deleteLabel opts label = deleteLabel' opts label.name
+
+deleteLabel' :: IssueLabelRequestOpts -> String -> ExceptT Error Aff Unit
+deleteLabel' opts labelName = do
   resp <- ExceptT $ map (lmap (error <<< AX.printError)) $ AX.request $ AX.defaultRequest
     { method = Left DELETE
     , headers = mkHeaders opts
-    , url = i (mkApiUrl opts) "/" label.name
+    , url = i (mkApiUrl opts) "/" labelName
     }
 
   unless (resp.status == StatusCode 204) do
-    throwError $ error $ "Did not receive StatusCode 204 when deleting label: " <> label.name
+    throwError $ error $ "Did not receive StatusCode 204 when deleting label: " <> labelName
 
 -- | Construct the GitHub API base endpoint for issue labels given a repository
 -- | owner and nmae.
