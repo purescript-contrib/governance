@@ -6,7 +6,7 @@ Thank you for your interest in contributing to a PureScript Contributors library
 
 ### Do I belong here?
 
-Everyone is welcome! People of all experience levels can join, begin contributing, and feel comfortable and safe making mistakes. People of all backgrounds belong here so long as they treat others with dignity and respect and do not harass or belittel others.
+Everyone is welcome! People of all experience levels can join, begin contributing, and feel comfortable and safe making mistakes. People of all backgrounds belong here so long as they treat others with dignity and respect and do not harass or belittle others.
 
 ### What is the correct way to ask a question?
 
