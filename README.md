@@ -9,6 +9,7 @@ You may want to begin with these resources:
 - The [contributing](./contributing.md) guide helps new contributors get started with their first contributions to a member library.
 - The [library guidelines](./library-guidelines.md) guide outlines expectations for each library in the organization, including minimum requirements for maintenance, repository structure, documentation, and testing.
 - The [contrib-updater](./updater) CLI tool helps maintainers with tasks like standardizing repositories, setting issue labels, migrating new libraries into the organization, and more. It also includes templates for common files like READMEs, continuous integration, and more. 
+- The [Pursuit publishing instructions](./pursuit-preregistry.md).
 
 ## What is the PureScript Contributors organization?
 
