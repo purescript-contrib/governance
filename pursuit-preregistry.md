@@ -2,8 +2,9 @@
 
 In 2022 Pursuit and the PureScript ecosystem are in the interstice between 
 [Bower](https://bower.io/) and 
-[Registry](https://github.com/purescript/registry). The PureScript package system was originally built on Bower, but Bower 
-has been deprecated. The PureScript core team is working on replacement package system called Registry, but it is not ready yet.
+[Registry](https://github.com/purescript/registry). The PureScript package system was originally built on Bower, but 
+[Bower has been retired](https://discourse.purescript.org/t/the-bower-registry-is-no-longer-accepting-package-submissions/1103). 
+The PureScript core team is working on a replacement package system called Registry, but it is not yet ready.
 In this post-Bower, pre-Registry era, we still need to publish packages to Pursuit.
 
 These instructions provide a reasonable basic method for publishing to Pursuit in 2022.
