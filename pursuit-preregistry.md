@@ -4,7 +4,7 @@ In 2022 Pursuit and the PureScript ecosystem are in the interstice between
 [Bower](https://bower.io/) and 
 [Registry](https://github.com/purescript/registry). The PureScript package system was originally built on Bower, but Bower 
 has been deprecated. The PureScript core team is working on replacement package system called Registry, but it is not ready yet.
-In this post-Bower, pre-registry era, we still need to publish packages to Pursuit.
+In this post-Bower, pre-Registry era, we still need to publish packages to Pursuit.
 
 These instructions provide a reasonable basic method for publishing to Pursuit in 2022.
 Most of this advice is only applicable in the year 2022 and will be obsolete after the whole Bower and Registry situation is sorted out.
@@ -61,7 +61,7 @@ Then, in the package repo directory, issue the following commands.
 
 2. `spago bump-version --no-dry-run major`
 
-    If any package dependencies nmight have changed then we need to generate a new `bower.json`. If we are sure that no package
+    If any package dependencies might have changed then we need to generate a new `bower.json`. If we are sure that no package
     dependencies changed then we can skip this step.
     
     We don't really want to `spago bump-version` yet, what we want is for `spago` to generate a new `bower.json` for us,
@@ -94,8 +94,6 @@ Then, in the package repo directory, issue the following commands.
     This will publish our package to Pursuit. No README will appear because we haven't pushed the new version tag to Github yet, which is fine.
 
     This command often fails the first time, but run it again and it will always succeed, in my experience.
-
-    This is our last chance to change anything before we tag. Force-pushing *main* is less tacky than deleting a tag.
 
 10. `git push` the new tag.
 
