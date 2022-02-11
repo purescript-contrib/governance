@@ -15,7 +15,8 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
 * `purs`
 * `spago`
 * `pulp`
-* `nodejs`
+* `node`
+* `npm`
 * `bower`
 
 ```nix
