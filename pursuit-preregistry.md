@@ -21,28 +21,37 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
 
 ```nix
 # Universal shell for PureScript repos
+# { pkgs ? import <nixpkgs> { }
 { pkgs ? import (builtins.fetchGit {
-  # https://github.com/NixOS/nixpkgs/releases/tag/21.05
+  # https://github.com/NixOS/nixpkgs/releases/tag/21.11
   url = "https://github.com/nixos/nixpkgs/";
-  ref = "refs/tags/21.05";
-  rev = "7e9b0dff974c89e070da1ad85713ff3c20b0ca97";
-  }) {}
+  ref = "refs/tags/21.11";
+  rev = "a7ecde854aee5c4c7cd6177f54a99d2c1ff28a31";
+  })
+  # temporary fix for issue https://github.com/justinwoo/easy-purescript-nix/issues/188
+  { overlays = [
+    (self: super: {
+      ncurses5 = super.ncurses5.overrideAttrs (attr: {
+        configureFlags = attr.configureFlags ++ ["--with-versioned-syms"];
+      });
+    })
+  ];}
 }:
 let
   easy-ps = import (builtins.fetchGit {
     url = "https://github.com/justinwoo/easy-purescript-nix.git";
     ref = "master";
-    rev = "82f901ce0a2d86327e2d65993a75c2ea74f229f2";
+    rev = "aa72388ca0fb72ed64467f59a121db1f104897db";
   }) { inherit pkgs; };
 in
 pkgs.mkShell {
   nativeBuildInputs = [
-    easy-ps.purs-0_14_5
+    easy-ps.purs-0_14_7
     easy-ps.spago
     easy-ps.pulp
     easy-ps.psc-package
     easy-ps.purs-tidy
-    pkgs.nodejs-14_x
+    pkgs.nodejs-17_x
     pkgs.nodePackages.bower
   ];
   LC_ALL = "C.UTF-8"; # https://github.com/purescript/spago/issues/507
