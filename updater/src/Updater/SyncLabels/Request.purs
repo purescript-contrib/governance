@@ -78,10 +78,10 @@ listAllLabels token = do
   results <- parTraverse getRepoLabel allRepos
 
   let
-    labelMap ::
-      { labels :: Map String (Array String)
-      , metadata :: Map String (Map { description :: String, color :: String } (Array String))
-      }
+    labelMap
+      :: { labels :: Map String (Array String)
+         , metadata :: Map String (Map { description :: String, color :: String } (Array String))
+         }
     labelMap = foldl insertRepoForEachLabel emptyMaps results
       where
       emptyMaps = { labels: Map.empty, metadata: Map.empty }
