@@ -27,28 +27,21 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
   url = "https://github.com/nixos/nixpkgs/";
   ref = "refs/tags/21.11";
   rev = "a7ecde854aee5c4c7cd6177f54a99d2c1ff28a31";
-  })
-  # temporary fix for issue https://github.com/justinwoo/easy-purescript-nix/issues/188
-  { overlays = [
-    (self: super: {
-      ncurses5 = super.ncurses5.overrideAttrs (attr: {
-        configureFlags = attr.configureFlags ++ ["--with-versioned-syms"];
-      });
-    })
-  ];}
+  }) {}
 }:
 let
-  easy-ps = import (builtins.fetchGit {
+  easy-ps-src = builtins.fetchGit {
     url = "https://github.com/justinwoo/easy-purescript-nix.git";
     ref = "master";
-    rev = "aa72388ca0fb72ed64467f59a121db1f104897db";
-  }) { inherit pkgs; };
+    rev = "0ad5775c1e80cdd952527db2da969982e39ff592";
+  };
+  easy-ps = import easy-ps-src { inherit pkgs; };
 in
 pkgs.mkShell {
   nativeBuildInputs = [
-    easy-ps.purs-0_14_7
+    easy-ps.purs-0_15_0
     easy-ps.spago
-    easy-ps.pulp
+    easy-ps.pulp-16_0_0-0
     easy-ps.psc-package
     easy-ps.purs-tidy
     pkgs.nodejs-17_x
@@ -58,6 +51,7 @@ pkgs.mkShell {
   # https://github.com/purescript/spago#install-autocompletions-for-bash
   shellHook = ''
     source <(spago --bash-completion-script `which spago`)
+    PATH=$PATH:~/work/
   '';
 }
 ```
