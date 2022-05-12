@@ -51,7 +51,6 @@ pkgs.mkShell {
   # https://github.com/purescript/spago#install-autocompletions-for-bash
   shellHook = ''
     source <(spago --bash-completion-script `which spago`)
-    PATH=$PATH:~/work/
   '';
 }
 ```
