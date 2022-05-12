@@ -21,7 +21,6 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
 
 ```nix
 # Universal shell for PureScript repos
-# { pkgs ? import <nixpkgs> { }
 { pkgs ? import (builtins.fetchGit {
   # https://github.com/NixOS/nixpkgs/releases/tag/21.11
   url = "https://github.com/nixos/nixpkgs/";
