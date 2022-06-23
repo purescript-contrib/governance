@@ -45,6 +45,7 @@ pkgs.mkShell {
     easy-ps.purs-tidy
     pkgs.nodejs-17_x
     pkgs.nodePackages.bower
+    pkgs.esbuild # for spago bundle-app
   ];
   LC_ALL = "C.UTF-8"; # https://github.com/purescript/spago/issues/507
   # https://github.com/purescript/spago#install-autocompletions-for-bash
