@@ -14,38 +14,43 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
 
 * `purs`
 * `spago`
+* `purs-tidy`
+* `purs-backend-es`
 * `pulp`
 * `node`
 * `npm`
 * `bower`
+* `esbuild`
 
 ```nix
 # Universal shell for PureScript repos
+# { pkgs ? import <nixpkgs> { }
 { pkgs ? import (builtins.fetchGit {
-  # https://github.com/NixOS/nixpkgs/releases/tag/21.11
+  # https://github.com/NixOS/nixpkgs/releases/tag/22.05
   url = "https://github.com/nixos/nixpkgs/";
-  ref = "refs/tags/21.11";
-  rev = "a7ecde854aee5c4c7cd6177f54a99d2c1ff28a31";
+  ref = "refs/tags/22.05";
+  rev = "ce6aa13369b667ac2542593170993504932eb836";
   }) {}
 }:
 let
   easy-ps-src = builtins.fetchGit {
     url = "https://github.com/justinwoo/easy-purescript-nix.git";
     ref = "master";
-    rev = "0ad5775c1e80cdd952527db2da969982e39ff592";
+    rev = "3d8b602e80c0fa7d97d7f03cb8e2f8b06967d509";
   };
   easy-ps = import easy-ps-src { inherit pkgs; };
 in
 pkgs.mkShell {
   nativeBuildInputs = [
-    easy-ps.purs-0_15_0
+    easy-ps.purs-0_15_4
     easy-ps.spago
-    easy-ps.pulp-16_0_0-0
+    easy-ps.pulp
     easy-ps.psc-package
     easy-ps.purs-tidy
-    pkgs.nodejs-17_x
+    easy-ps.purs-backend-es
+    pkgs.nodejs-18_x
     pkgs.nodePackages.bower
-    pkgs.esbuild # for spago bundle-app
+    pkgs.esbuild
   ];
   LC_ALL = "C.UTF-8"; # https://github.com/purescript/spago/issues/507
   # https://github.com/purescript/spago#install-autocompletions-for-bash
