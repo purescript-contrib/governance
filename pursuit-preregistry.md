@@ -108,5 +108,4 @@ Then, in the package repo directory, issue the following commands.
 
     Now the README will appear on Pursuit.
 
-Don’t forget to update package-sets. https://github.com/purescript/package-sets/blob/master/CONTRIBUTING.md#how-to-add-a-package-to-the-set
-
+Don’t forget to update the registry. https://github.com/purescript/registry#publish-a-package
