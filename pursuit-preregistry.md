@@ -94,18 +94,14 @@ Then, in the package repo directory, issue the following commands.
 
     For real this time.
 
-7. `git push origin main` 
+7. `git push origin main`
 
-     Push the *main* branch to Github. Make sure it passes CI.
+    Push the *main* branch to Github. Make sure it passes CI.
+    
+8. `git push` the new tag.
 
-8. `pulp publish --no-push`
+9. Publish to the Registry
 
-    This will publish our package to Pursuit. No README will appear because we haven't pushed the new version tag to Github yet, which is fine.
-
-    This command often fails the first time, but run it again and it will always succeed, in my experience.
-
-10. `git push` the new tag.
-
-    Now the README will appear on Pursuit.
-
-Don’t forget to update the registry. https://github.com/purescript/registry#publish-a-package
+   https://github.com/purescript/registry#publish-a-package
+    
+   The [pacchettibotti](https://github.com/pacchettibotti) will publish our package to Pursuit. 
