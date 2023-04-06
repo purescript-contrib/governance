@@ -24,25 +24,24 @@ Here is a `shell.nix` file which gives us a `nix-shell` with these tools on the 
 
 ```nix
 # Universal shell for PureScript repos
-# { pkgs ? import <nixpkgs> { }
 { pkgs ? import (builtins.fetchGit {
   # https://github.com/NixOS/nixpkgs/releases/tag/22.05
   url = "https://github.com/nixos/nixpkgs/";
-  ref = "refs/tags/22.05";
-  rev = "ce6aa13369b667ac2542593170993504932eb836";
+  ref = "refs/tags/22.11";
+  rev = "4d2b37a84fad1091b9de401eb450aae66f1a741e";
   }) {}
 }:
 let
   easy-ps-src = builtins.fetchGit {
     url = "https://github.com/justinwoo/easy-purescript-nix.git";
     ref = "master";
-    rev = "3d8b602e80c0fa7d97d7f03cb8e2f8b06967d509";
+    rev = "11d3bd58ce6e32703bf69cec04dc7c38eabe14ba";
   };
   easy-ps = import easy-ps-src { inherit pkgs; };
 in
 pkgs.mkShell {
   nativeBuildInputs = [
-    easy-ps.purs-0_15_4
+    easy-ps.purs-0_15_7
     easy-ps.spago
     easy-ps.pulp
     easy-ps.psc-package
