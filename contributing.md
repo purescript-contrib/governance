@@ -47,6 +47,10 @@ If you would like to contribute code, tests, or documentation, please feel free 
 
 All changes must happen through a pull request. Everyone with commit access can merge changes, though by convention we like to wait for two approvals for non-trivial changes. All pull requests must pass continuous integration; if the change adds new code we may also ask that you add a test.
 
+### Publishing
+
+See [Spago Pursuit publishing instructions](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library).
+
 ## How do I get the "commit bit"?
 
 If you'd like to take part in maintaining a package, just ask! We hand out the commit bit to folks who display sustained interest in the project. You can ask directly (for example: on Slack or via a DM on Discourse) or by opening an issue -- whichever you prefer!
