@@ -35,7 +35,7 @@ If you have larger contributions to make, those are also welcome. However, if yo
 
 ### Tooling
 
-All `purescript-contrib` libraries use recent versions of [PureScript](https://github.com/purescript/purescript), [Spago](https://github.com/purescript/spago), and [psa](https://github.com/natefaubion/purescript-psa). A library without scripts in a `package.json` file will use the standard `spago build` and `spago test` commands.
+All `purescript-contrib` libraries use recent versions of [PureScript](https://github.com/purescript/purescript) and [Spago](https://github.com/purescript/spago).
 
 Any additional development dependencies can be installed via NPM and are listed in the `package.json` file for the repository.
 
