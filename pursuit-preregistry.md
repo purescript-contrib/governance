@@ -1,7 +1,7 @@
 > [!WARNING]
 > 
 > In late 2024 this document is obsolete. See
-> - [Spago: Publish my library](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library).
+> - [Spago: Publish my library](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library)
 > - [Registry: Publish a Package](https://github.com/purescript/registry#publish-a-package)
 
 # How to publish a package to Pursuit
