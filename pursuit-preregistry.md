@@ -1,3 +1,7 @@
+> [!WARNING]
+> 
+> In late 2024 this document is obsolete. See [Spago Pursuit publishing instructions](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library).
+
 # How to publish a package to Pursuit
 
 In 2022 Pursuit and the PureScript ecosystem are in the interstice between 
