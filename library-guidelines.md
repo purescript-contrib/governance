@@ -7,6 +7,7 @@ This short handbook outlines the mimimum expectations for libraries in the PureS
 Libraries in the Contributors organization are expected to:
 
 1. Have at least one (and preferably more) assigned maintainers, as indicated by badges in the project README.
+1. Depend only on PureScript [core packages](https://github.com/orgs/purescript/repositories) or other **contrib** packages.
 1. Have adequate documentation in the form of module documentation published to Pursuit, a README containing a library summary, installation instructions, and more, and a `docs` directory containing at least a short tutorial (see [the documentation section below](#documentation)).
 1. Have a CHANGELOG.md in the root directory.
 1. Have an adequate test suite which is exercised by continuous integration (see [the tests section below](#tests))
