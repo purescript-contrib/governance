@@ -49,7 +49,9 @@ All changes must happen through a pull request. Everyone with commit access can 
 
 ### Publishing
 
-See [Spago Pursuit publishing instructions](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library).
+See
+- [Spago: Publish my library](https://github.com/purescript/spago?tab=readme-ov-file#publish-my-library)
+- [Registry: Publish a Package](https://github.com/purescript/registry#publish-a-package)
 
 ## How do I get the "commit bit"?
 
