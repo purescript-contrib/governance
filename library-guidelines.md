@@ -13,6 +13,7 @@ Libraries in the Contributors organization are expected to:
 1. Have an adequate test suite which is exercised by continuous integration (see [the tests section below](#tests))
 1. Use the standard Contributors repository structure, which can be generated with the [contrib-updater](./updater) tool (see [the repository structure section below](#repository-structure)).
 1. Use a default branch of `main` for the repository.
+2. Package name registered with the [registry](https://github.com/purescript/registry). No `bower.json`.
 
 Libraries in this organization should be useful, tested, and well-documented. These are great things to shoot for in any library, but Contributors libraries are held to a particular standard to encourage new contributions and to serve as an example for other libraries in the community.
 
